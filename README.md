@@ -82,11 +82,11 @@ Stackup: L1 signal + power, L2 ground, L3 / L4 signal + power, L5 ground (identi
 <img src="Documentation/images/layout_all_signal_layers.jpg" width="100%" alt="All four routing layers overlaid">
 </details>
 
-Plots of every copper, mask, paste and silkscreen layer are in [`Project Outputs/PCB Layers PDF/`](Project%20Outputs/PCB%20Layers%20PDF/). The full board drawing is [`FoC_Motor_Controller_PCB_Artwork.pdf`](FoC_Motor_Controller_PCB_Artwork.pdf).
+Plots of every copper, mask, paste and silkscreen layer are in [`Project Outputs/PCB Layers PDF/`](Project%20Outputs/PCB%20Layers%20PDF/). The full board drawing is [`FoC_Motor_Controller_PCB_Artwork.pdf`](Documentation/FoC_Motor_Controller_PCB_Artwork.pdf).
 
 ## Simulation vs scope
 
-Three LTspice decks built from the Rev 1 netlist, each predicting what a bench measurement on a Rigol DHO804 should show, then checked against the scope captures. Full slides: [`FOC_Motor_Controller_Sim_and_Bench_Results.pdf`](FOC_Motor_Controller_Sim_and_Bench_Results.pdf). Decks, raw captures and scripts: [`Simulation/`](Simulation/).
+Three LTspice decks built from the Rev 1 netlist, each predicting what a bench measurement on a Rigol DHO804 should show, then checked against the scope captures. Full slides: [`FOC_Motor_Controller_Sim_and_Bench_Results.pdf`](Documentation/FOC_Motor_Controller_Sim_and_Bench_Results.pdf). Decks, raw captures and scripts: [`Simulation/`](Simulation/).
 
 | | Simulation | Bench vs simulation |
 |---|---|---|
@@ -135,19 +135,19 @@ Screenshots are from the GUI's built-in board simulator (`python -m focgui --sim
 
 | File | What it is |
 |---|---|
-| [`FoC_Motor_Controller_Schematic.pdf`](FoC_Motor_Controller_Schematic.pdf) | Full schematic, 12 hierarchical sheets |
-| [`FoC_Motor_Controller_PCB_Artwork.pdf`](FoC_Motor_Controller_PCB_Artwork.pdf) | Board drawing |
-| [`FOC_Motor_Controller_Rev1_Technical_Reference.pdf`](FOC_Motor_Controller_Rev1_Technical_Reference.pdf) | Rev 1 technical reference |
-| [`FOC_Motor_Controller_Sim_and_Bench_Results.pdf`](FOC_Motor_Controller_Sim_and_Bench_Results.pdf) | Simulation and bench-correlation slides |
-| [`FOC_Controller_Summary.pdf`](FOC_Controller_Summary.pdf) | Project summary |
-| [`FOC_Controller_RevC_Action_Summary.pdf`](FOC_Controller_RevC_Action_Summary.pdf) | Review actions |
+| [`FoC_Motor_Controller_Schematic.pdf`](Documentation/FoC_Motor_Controller_Schematic.pdf) | Full schematic, 12 hierarchical sheets |
+| [`FoC_Motor_Controller_PCB_Artwork.pdf`](Documentation/FoC_Motor_Controller_PCB_Artwork.pdf) | Board drawing |
+| [`FOC_Motor_Controller_Rev1_Technical_Reference.pdf`](Documentation/FOC_Motor_Controller_Rev1_Technical_Reference.pdf) | Rev 1 technical reference |
+| [`FOC_Motor_Controller_Sim_and_Bench_Results.pdf`](Documentation/FOC_Motor_Controller_Sim_and_Bench_Results.pdf) | Simulation and bench-correlation slides |
+| [`FOC_Controller_Summary.pdf`](Documentation/FOC_Controller_Summary.pdf) | Project summary |
+| [`FOC_Controller_RevC_Action_Summary.pdf`](Documentation/FOC_Controller_RevC_Action_Summary.pdf) | Review actions |
 | [`Documentation/Design_Notes.md`](Documentation/Design_Notes.md) | The full design write-up: theory, power stage, gate drive, current sensing, power tree, layout, safety, bring-up, Rev 2 list, lessons |
 
 ## Repository layout
 
 | Path | Contents |
 |---|---|
-| `*.pdf` | Schematic, PCB artwork and reports (above) |
+| `Documentation/*.pdf` | Schematic, PCB artwork and reports (above) |
 | `FoC Motor Controller.kicad_pro` / `.kicad_sch` / `.kicad_pcb` | KiCad 10 project, root sheet and board |
 | `Schematics/` | Hierarchical sheets: power input and generation, MCU, gate driver, MOSFETs, sensing, CAN-FD, interconnects, position, LEDs |
 | `Libraries/` | Project-local symbols, footprints and 3D models (`${KIPRJMOD}/Libraries/`) |

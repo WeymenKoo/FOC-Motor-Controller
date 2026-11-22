@@ -3,7 +3,7 @@ Every connection is a drawn wire; FLAGs are used only for ground, and to *name* 
 (so .meas statements and B-source expressions can refer to it).
 
 Design values come from the Rev 1 KiCad netlist (Project Outputs/Netlist) and the
-firmware (Firmware/CLAUDE.md, app_config.h, app_params.c defaults)."""
+firmware (firmware notes, app_config.h, app_params.c defaults)."""
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ascgen import Sheet, ltrun
