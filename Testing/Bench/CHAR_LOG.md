@@ -480,3 +480,15 @@ With compensation the plant the current loop sees is close to linear: 36 mΩ slo
   noise feeds back into the voltage: ripple × 3–5. **Left off by default (0).** Useful for standstill / low-speed holds
   (~0.10 V). Next step: drive it from the current reference (or a filtered current) instead of the raw measurement.
 - ISR peak 33.5 µs of 40, 0 overruns. Flash 95.1 %, RAM 96.6 %.
+
+## B9 — switch node on the driver's sense trace (TP38, SHA) · `char/B9/20261122_212218`
+Phase A sinking 3 A, **12 V** (chosen so that a probe slip onto the gate test point 1.3 mm away stays under the 13.5 V gate-pin
+rating; B8 showed the undershoot does not depend on the bus voltage). CH1 TP38 (9.6 mm from the driver) ref R27-GND, hand-held.
+| IDRIVE | Low-side turn-on (hard) t10–90 | Minimum at TP38 | Minimum at the phase pad H1 (B8 / B4neg) |
+|---|---|---|---|
+| 11 (440 / 880 mA) | 8.8 ns | −2.62 V | −2.70 V |
+| 7 (190 / 380 mA) | 16.8 ns | −0.42 V (no undershoot beyond the −0.2 V plateau) | −0.76 V at 30 V |
+- **The sense trace delivers the same spike to the driver as the phase pad shows (−2.6 vs −2.7 V): no filtering along it.** The
+  pad measurements are therefore a fair proxy for the SHx pin, as far as a shunt-ground reference goes.
+- Not covered: the driver's own ground against the shunt ground (the nearest driver-ground pad is 14 mm from TP38), and phase C.
+- IDRIVE 7 removes the undershoot entirely for ~8 ns of extra edge time — the setting to use if more margin is needed at higher current.
