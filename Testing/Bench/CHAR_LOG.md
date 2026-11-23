@@ -173,3 +173,31 @@ K-type thermocouple (user DMM) taped to the phase A low-side FET case; board NTC
   (datasheet 39) and the 98 mΩ included lead/connector resistance, or (H2) R = 98 mΩ and the CSA over-reads by ~1.45×.
   **Must be resolved before the current numbers in this log are trusted for the envelope** → DMM in series with a phase lead.
 - **Unexplained:** this run's holds settled at 0.80 × command at all three currents (B1/E1 reached 1.00×). Not yet understood.
+
+## A5b — shunt voltage vs SOA with the scope · `char/A5b/20261122_194728` — INCONCLUSIVE
+CH1 R22-S ref R22-GND (5 mV/div, 20 MHz), CH2 TP20 (SOA) ref J7-5. Holds reached the full command (ia 3.017 / 5.022 A).
+| Hold | V_shunt step (on − off window) | I if R = 3.000 mΩ | SOA step | Apparent gain |
+|---|---|---|---|---|
+| 3 A | −10.70 mV | 3.57 A | 176.6 mV | 16.5 V/V |
+| 5 A | −17.14 mV | 5.71 A | 296.5 mV | 17.3 V/V |
+**Not usable as a calibration:** with the high side on (zero shunt current) CH1 sits ~6 mV above its idle level — a ground-loop
+error (two probe grounds + USB grounds; bridge return current in the ground plane) of the same size as the signal. The apparent
+gain is uncertain by roughly ±30 %; neither "CSA correct, motor ~40 mΩ" nor "CSA over-reads 1.45×" is excluded.
+→ Repeat with a floating instrument: DMM (mV DC) across the shunt during a static hold: V_avg = −I · R · (shunt conduction
+fraction ≈ 1 − duty_a + 0.5 %), no ground loop. Or measure the motor's line-line resistance directly (4-wire, PSU in CC + DMM).
+
+## A5c — floating DMM across the phase A shunt · `char/A5c/20261122_195039` — current-sense scale CONFIRMED
+DMM (mV DC, battery-powered: no ground loop) on R22-S / R22-GND during SL_POSITION holds; no scope on the board.
+Expected V_avg = −ia · 3 mΩ · (1 − duty_a + t_dead/T).
+| Hold | Board ia | duty_a | Shunt conducts | Expected | DMM | Ratio |
+|---|---|---|---|---|---|---|
+| 5 A | 4.999 A | 50.81 % | 49.69 % | −7.45 mV | **−7.57 mV** | 1.016 |
+| 3 A | 3.004 A | 50.66 % | 49.84 % | −4.49 mV | **−4.52 mV** | 1.007 |
+- **The board's phase-current measurement is correct within 1–2 %** (shunt tolerance 1 % + DMM). The "CSA over-reads 1.45×"
+  hypothesis is rejected; all current values in this log stand.
+- Therefore the energy balance (A5) means **the motor's phase resistance is ~40–60 mΩ, not 98 mΩ** (datasheet 39 mΩ; the
+  balance is ±30 %: switching loss falls as the soft edge completes inside the dead time). Likely causes of the earlier 98 mΩ:
+  the ID_R test runs at ≤ 1 A, where the dead-time voltage error still varies with current (B1) and adds to the V–I slope; the
+  DC cross-check included the supply leads. **Firmware: `p_phase_r` (0.098 Ω) is suspect** — it sets the current-loop Ki and
+  the observer's R·i term. → Direct 4-wire measurement of the motor (PSU in CC + DMM at the pins) to pin the value.
+- Lesson: millivolt measurements on a switching board need a floating instrument (A5b's scope attempt was ±30 %).

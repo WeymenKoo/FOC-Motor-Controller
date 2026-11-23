@@ -13,9 +13,9 @@ K-type thermocouple. Work in progress — this page is updated as tests are adde
 | `char/<test>/<timestamp>/` | Raw waveforms (`.npz`), scope screenshots, per-test JSON/CSV |
 | `instruments.py`, `analyze_edges.py` | Scope / PSU control and the edge-metric extraction used for the tables |
 
-**Status of the numbers:** voltages, timings and temperatures below are measured. **Current values are provisional** until the
-current-sense scale is cross-checked against the shunt voltage (open item 1) — an energy balance suggests either the
-motor's phase resistance is ~40–45 mΩ (not the 98 mΩ identified earlier) or the current sense over-reads by ~1.45×.
+**Status of the numbers:** voltages, timings, temperatures and currents are measured. The current-sense scale was
+cross-checked with a floating DMM across the phase A shunt (A5c): correct within 1–2 %. One consequence: the motor's phase
+resistance is ~40–60 mΩ (datasheet 39 mΩ), not the 98 mΩ identified earlier — to be pinned with a direct 4-wire measurement.
 
 ## Results at a glance (30 V bus)
 
@@ -30,6 +30,7 @@ motor's phase resistance is ~40–45 mΩ (not the 98 mΩ identified earlier) or 
 | Idle / overhead power | MCU + regulators 0.39 W, gate driver awake +0.36 W, switching at zero current +0.81 W |
 | No-load input power | 6.1 W at 1000 rpm, 13.3 W at 2000 rpm, 21.1 W at 3000 rpm (sensorless closed loop) |
 | Firmware over-current trip | Outputs off ~19 µs after the ADC sample that sees it; worst case ≈ 60 µs → overload protection only |
+| Current-sense scale | Floating DMM across the shunt: board reading correct within 1–2 % (3 A and 5 A) |
 | Three-shunt current sensing | Phase C is sampled 0.87–1.45 µs after the window centre (second in its ADC's sequence): valid only for low-side windows ≥ ~3 µs. Phases A/B valid to ~1.2 µs |
 | Thermal (rotor parked, 10 min each) | FET case +7.5 °C at 3 A, +10.2 °C at 5 A; fit: 6.0 °C fixed + 0.17 °C/A². Board NTC reads 1.5–2 °C above the FET case |
 
@@ -47,6 +48,8 @@ motor's phase resistance is ~40–45 mΩ (not the 98 mΩ identified earlier) or 
   sink regenerated energy.
 - **Gate drive:** IDRIVE 440/880 mA is a reasonable default (one third less overshoot, lower EMI, small switching-loss cost) —
   to be confirmed at higher current.
+- **Motor constants:** the stored phase resistance (98 mΩ) is about twice the real value; identification at ≤ 1 A is biased by
+  the dead-time error. Re-identify at higher current or with dead-time compensation.
 - **Thermal:** 5 A continuous in one phase costs +10 °C on the FET case; extrapolated +23 °C at 10 A (two points — to be confirmed).
 
 ## Rev B candidates
@@ -63,7 +66,7 @@ motor's phase resistance is ~40–45 mΩ (not the 98 mΩ identified earlier) or 
 
 ## Open items
 
-1. **Current-sense scale** — measure the shunt voltage directly against the amplifier output (gain should be 20 V/V).
+1. **Motor phase resistance** — direct 4-wire measurement (the stored 98 mΩ is ~2× too high; it sets current-loop and observer constants).
 2. Opposite-polarity hard edge, phases B and C, 12 V / 24 V points.
 3. Back-EMF capture while coasting (motor flux constant independent of the current sense).
 4. Gate driver over-current trip point and latency; 10 A thermal hold; regeneration step; shorter dead-time (all supervised).
