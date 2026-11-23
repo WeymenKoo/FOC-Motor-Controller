@@ -9,14 +9,16 @@ Technical notes from a full design cycle: idea → theory → schematic → simu
 
 | Path | Contents |
 |---|---|
-| `FoC Motor Controller.kicad_pro` / `.kicad_sch` / `.kicad_pcb` | KiCad 10 project, root sheet and board |
-| `Schematics/` | Hierarchical sheets (power, MCU, gate driver, MOSFETs, sensing, CAN-FD, interconnects, ...) |
-| `Libraries/` | Project-local symbols, footprints and 3D models (referenced via `${KIPRJMOD}/Libraries/`) |
+| `Hardware/` | KiCad 10 project (`FoC Motor Controller.kicad_pro` / `.kicad_sch` / `.kicad_pcb`), design rules and library tables |
+| `Hardware/Schematics/` | Hierarchical sheets (power, MCU, gate driver, MOSFETs, sensing, CAN-FD, interconnects, ...) |
+| `Hardware/Libraries/` | Project-local symbols, footprints and 3D models (referenced via `${KIPRJMOD}/Libraries/`) |
+| `Hardware/Project Outputs/` | BOM, pick-and-place, netlist, fabrication package (Rev 1), schematic PDF |
+| `Testing/Simulation/` | LTspice bench-correlation suite (hot-plug, half-bridge switching, current sense) with DHO804 bench captures and comparisons; see `Testing/Simulation/README.md` |
+| `Testing/Bench/` | Bench test plans and procedures |
 | `Documentation/` | Design rationale, layout/manufacturing review, board renders, RevC action summary |
-| `Simulation/` | LTspice bench-correlation suite (hot-plug, half-bridge switching, current sense) with DHO804 bench captures and comparisons; see `Simulation/README.md` |
-| `Project Outputs/` | BOM, pick-and-place, netlist, fabrication package (Rev 1), schematic PDF |
+| `Firmware/`, `GUI/` | STM32G431 firmware and the FOCLINK GUI (kept in a separate repository, not published here) |
 
-Open `FoC Motor Controller.kicad_pro` in KiCad 10. Vendor datasheets and the KiCad worksheet templates are not included in this repo; without the templates KiCad falls back to its default title block.
+Open `Hardware/FoC Motor Controller.kicad_pro` in KiCad 10. Vendor datasheets and the KiCad worksheet templates are not included in this repo; without the templates KiCad falls back to its default title block.
 
 ---
 
