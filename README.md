@@ -163,17 +163,13 @@ Screenshots are from the GUI's built-in board simulator (`python -m focgui --sim
 |---|---|
 | [`FoC_Motor_Controller_Schematic.pdf`](Documentation/FoC_Motor_Controller_Schematic.pdf) | Full schematic, 12 hierarchical sheets |
 | [`FoC_Motor_Controller_PCB_Artwork.pdf`](Documentation/FoC_Motor_Controller_PCB_Artwork.pdf) | Board drawing |
-| [`FOC_Motor_Controller_Rev1_Technical_Reference.pdf`](Documentation/FOC_Motor_Controller_Rev1_Technical_Reference.pdf) | Rev 1 technical reference |
 | [`FOC_Motor_Controller_Sim_and_Bench_Results.pdf`](Documentation/FOC_Motor_Controller_Sim_and_Bench_Results.pdf) | Simulation and bench-correlation slides |
-| [`FOC_Controller_Summary.pdf`](Documentation/FOC_Controller_Summary.pdf) | Project summary |
-| [`FOC_Controller_RevC_Action_Summary.pdf`](Documentation/FOC_Controller_RevC_Action_Summary.pdf) | Review actions |
-| [`Documentation/Design_Notes.md`](Documentation/Design_Notes.md) | The full design write-up: theory, power stage, gate drive, current sensing, power tree, layout, safety, bring-up, Rev 2 list, lessons |
 
 ## Repository layout
 
 | Path | Contents |
 |---|---|
-| `Documentation/*.pdf` | Schematic, PCB artwork and reports (above) |
+| `Documentation/*.pdf` | Schematic, PCB artwork, sim-vs-bench results (above) |
 | `Hardware/FoC Motor Controller.kicad_pro` / `.kicad_sch` / `.kicad_pcb` | KiCad 10 project, root sheet and board |
 | `Hardware/Schematics/` | Hierarchical sheets: power input and generation, MCU, gate driver, MOSFETs, sensing, CAN-FD, interconnects, position, LEDs |
 | `Hardware/Libraries/` | Project-local symbols, footprints and 3D models (`${KIPRJMOD}/Libraries/`) |
@@ -181,7 +177,7 @@ Screenshots are from the GUI's built-in board simulator (`python -m focgui --sim
 | `Testing/README.md` | **The test and bring-up report**: every test in order, why, what was found, what changed |
 | `Testing/Bench/` | Lab notebook, raw captures, report figures, probe map |
 | `Hardware/Project Outputs/` | BOM, pick-and-place, netlist, Rev 1 fabrication package, per-layer PDFs |
-| `Documentation/` | Design notes, design rationale (DDR-001), layout and manufacturing review, portfolio deck, images |
+| `Documentation/images/` | Board photo, renders, layer views, sim-vs-bench figures, GUI screenshots |
 
 Open `Hardware/FoC Motor Controller.kicad_pro` in KiCad 10. Vendor datasheets and the KiCad worksheet templates are not included; without the templates KiCad falls back to its default title block.
 
@@ -193,4 +189,4 @@ Open `Hardware/FoC Motor Controller.kicad_pro` in KiCad 10. Vendor datasheets an
 4. More bulk capacitance, or a lower-ESR part
 5. Hardware CAN node addressing
 
-The full list, with reasons, is in [Design Notes §16](Documentation/Design_Notes.md#16-rev-2-list). Measured inputs for the next revision (braking energy path, ADC input mapping, leg C's commutation loop, shunt layout, probe points) are in the [test and bring-up report](Testing/README.md#part-5-what-changed-because-of-all-this).
+Measured inputs for the next revision (braking energy path, ADC input mapping, leg C's commutation loop, shunt layout, probe points) are in the [test and bring-up report](Testing/README.md#part-5-what-changed-because-of-all-this).
