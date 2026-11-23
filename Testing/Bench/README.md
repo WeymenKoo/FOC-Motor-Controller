@@ -49,6 +49,7 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
 | Stop paths | Heartbeat loss → outputs off at 501 ms (500 ms setting), every time; STOP / DISARM acknowledged in 11–44 ms over USB-serial |
 | Sensorless start-up | 50 / 50 starts to 1000 rpm; closed loop 2.449 ± 0.011 s after RUN |
 | Brown-out | Runs down to 5 V, restarts at 5–6 V; clean power-on reset, no latch-up; analog supply steady at 3.30 V throughout |
+| Regeneration (bare rotor, 3 A braking) | 12 V bus: +11 V from 1000 rpm; from 2000–2500 rpm it reaches the firmware's voltage clamp (set to 30 V) and stays within 0.1 V of it |
 | Thermal (rotor parked, 10 min each) | FET case +7.5 °C at 3 A, +10.2 °C at 5 A; fit: 6.0 °C fixed + 0.17 °C/A². Board NTC reads 1.5–2 °C above the FET case |
 
 ## What the firmware has to design around (provisional envelope)
@@ -68,8 +69,9 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
   50 ns setting removes ~43 mV. It limits low-speed torque linearity and blocks high-frequency-injection sensing.
 - **Over-voltage limit ≥ ~1.15 × the operating bus**, or the regen guard that refuses to lower the speed reference near OV is
   permanently active.
-- **Stops must coast.** The bus capacitance (~350 µF) holds far less energy than the rotor at speed; the bench supply cannot
-  sink regenerated energy.
+- **Braking pumps the bus.** Up to ~1 A of braking the board's own consumption absorbs it; at 3 A one 1000 → 300 rpm stop of the
+  bare rotor raised a 12 V bus by 11 V. The firmware now withdraws braking above 90 % of the over-voltage limit, and that
+  held the bus within 0.1 V of the set level from 2500 rpm (4 of 4 stops). Without a place for the energy, stops must coast.
 - **Gate drive: use 190/380 mA (IDRIVE 7); never the driver's default (1000/2000 mA).** The firmware caps it at 440/880 mA,
   but at that setting the driver's sense trace shows −4.2 V on phase A at 3 A / 30 V and phase C rings harder still, so
   little is left of the −7 V rating. At 190/380 mA the undershoot is gone (−0.9 V) for ~10 ns of extra edge time.
@@ -87,7 +89,7 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
 | Lower-inductance low-side source path (shunt placement, Kelvin return), snubber or low-side gate resistor | −8 to −10 V switch-node undershoot at low-side turn-on vs +0.9 V overshoot at high-side turn-on (B1 / B1neg) |
 | Shorter or tunable dead-time, gate resistors for edge control | Dead-time error (B1), IDRIVE trade-off (B4) |
 | Encoder read without blocking the control interrupt (faster SPI or DMA) | 3.5 µs of a 40 µs control period spent waiting on SPI |
-| Bus capacitance / braking path sized for regeneration | Rotor energy vs bus energy |
+| Braking resistor or active bus clamp (capacitance alone cannot absorb a joint's energy) | REGEN: 350 µF takes ~0.13 J from 12 to 30 V; the bare rotor alone holds 2.7 J at 2500 rpm |
 | Probe-friendly test points: switch nodes, shunts, gates with ground next to each, wider spacing | Gate and switch-node pads are 1.3 mm apart — unsafe to probe by hand while powered |
 | 5 V converter: fixed-frequency mode or more output capacitance, if anything sensitive hangs on +5V | ~100 mV p-p light-load ripple (A3) |
 
@@ -98,6 +100,6 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
 2. Undershoot at the driver IC's own pins (needs soldered leads: the only access is a 0.5 mm test point next to the gate
    test points) and at higher current / bus voltage, measured on phase C.
 3. Voltage-error compensation driven from the current reference instead of the measured current.
-4. Gate driver trip reaction time; 10 A thermal hold; regeneration step (supervised).
+4. Gate driver trip reaction time; 10 A thermal hold (prepared, not run).
 5. Not possible on this bench: efficiency under shaft load, bus-capacitor ripple at full power, high-side gate amplitude
    (needs a differential probe), EMC.

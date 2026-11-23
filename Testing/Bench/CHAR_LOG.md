@@ -613,3 +613,40 @@ No probes. IDRIVE 7, 30 V. Voltage error = output vector (from the duties) − 3
 - No shoot-through signature at any setting: zero-current switching power unchanged (+0.73–0.75 W), no faults.
 - **Envelope: keep the MCU dead-time at 200 ns (no benefit below it). DRV dead-time code 0 (50 ns) is a free ~19 % reduction
   of the voltage error** and can be set as a parameter (`p_drv_deadtime`), no rebuild.
+
+## REGEN — braking into the bus (firmware 2026-11-22d: `p_sl_brake_a`) · `char/REGEN/24V_20261122_221225`, `24V_…_221334`, `12V_…_221408`
+SENSORLESS at 1000 rpm, then REF VEL 300 with braking allowed (reference falls at 20 000 rpm/s; braking |iq| limited to the value
+given; forced to 0 above 0.9 × `p_ov_limit`). Peak bus voltage from the control loop (25 kHz). Bench supply connected (its output
+capacitor is in parallel with the board's ~350 µF). Rotor: ~0.40 J removed from 1000 to 300 rpm (J ≈ 8e-5 kg·m², estimate).
+| Bus | Braking limit | Time to < 400 rpm | Peak bus | Rise |
+|---|---|---|---|---|
+| 24 V | 0 (motoring only) | > 1.2 s (coasting on the 300 rpm/s ramp) | 23.99 V | 0 |
+| 24 V | 0.5 A | 0.17 s | 23.99 V | 0 |
+| 24 V | 1 A | 0.14 s | 23.99 V | 0 |
+| 24 V | 2 A | 0.07 s | 25.74 V | +1.8 V |
+| 24 V | 3 A | 0.10 s | 28.86 / 28.86 V | +5.0 V |
+| 12 V | 1 A | 0.14 s | 12.07 V | +0.1 V |
+| 12 V | 2 A | 0.09 s | 19.87 V | +8.0 V |
+| 12 V | 3 A | 0.06–0.07 s | 22.99 / 23.02 V | +11.1 V |
+- **Up to ~1 A of braking the board's own consumption absorbs everything** (no rise). Above that the bus pumps up at once:
+  **+11 V on a 12 V bus from one 1000 → 300 rpm stop at 3 A** — with a small, unloaded rotor.
+- Energy that ended in the capacitors: ≈ 0.05–0.07 J if only the board's 350 µF counted, i.e. roughly 15 % of the rotor's
+  0.40 J; the rest went to friction, iron and copper loss and the board's consumption. A joint inertia stores orders of magnitude more.
+- The observer stayed locked through every stop (no fail, no fault), and the sensorless loop held 300 rpm afterwards.
+- The firmware's clamp (braking → 0 above 0.9 × OV limit) was not reached in these runs (limit 30 V).
+
+### REGEN at the limit: 12 V bus, 3 A braking from 2000 and 2500 rpm, clamp level 29.97 V (0.9 × 33.3 V) · `char/REGEN/12V_20261122_221703`, `…_221751`
+| From | Rotor energy removed (to 300 rpm) | Time to < 400 rpm | Peak bus | Fault / lock |
+|---|---|---|---|---|
+| 2000 rpm | ≈ 1.7 J | 0.16–0.19 s | 30.04 / 30.04 V | none / held |
+| 2500 rpm | ≈ 2.7 J | 0.23–0.26 s | 30.06 / 30.05 V | none / held |
+- **The bus goes from 12 V to the clamp level and stops there: 0.07–0.09 V over it in 4 of 4 stops.** Above the clamp the
+  firmware withdraws braking pass by pass (25 kHz), the rotor coasts for a moment, the bus sags below the level and braking
+  resumes — the stop takes longer (0.06 s at 1000 rpm → 0.25 s from 2500 rpm) but the voltage holds.
+- Without that clamp the same stop would have carried the bus far past 30 V: 1.7–2.7 J against the ≈ 0.13 J that 350 µF
+  takes between 12 and 30 V.
+- **Envelope:** braking is usable up to ~1 A-equivalent of power (what the board itself consumes, a few watts) without any
+  bus rise; anything more must be limited by bus voltage, as implemented here, or absorbed in hardware. The clamp level must
+  sit below the lowest rating on the bus (here the bench supply's 30 V; on the board the 56 V design maximum).
+- **Rev B:** a braking resistor with a comparator- or MCU-driven switch, or a bus TVS / active clamp sized for the joint's
+  kinetic energy; more bus capacitance alone cannot do it (350 µF holds only ~0.4 J between 30 V and 56 V).
