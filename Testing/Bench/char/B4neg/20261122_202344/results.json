@@ -1,0 +1,56 @@
+[
+ {
+  "name": "ID15_rise",
+  "triggered": true,
+  "timebase": 5e-08,
+  "slope": "POSitive",
+  "ch1_max": 30.732564999999997,
+  "ch1_min": -0.8426456,
+  "ch2_mean": 1.5115225204620002
+ },
+ {
+  "name": "ID15_fall",
+  "triggered": true,
+  "timebase": 5e-08,
+  "slope": "NEGative",
+  "ch1_max": 30.2805763,
+  "ch1_min": -10.0344158,
+  "ch2_mean": 1.619498483478
+ },
+ {
+  "name": "ID11_rise",
+  "triggered": true,
+  "timebase": 5e-08,
+  "slope": "POSitive",
+  "ch1_max": 30.580568799999998,
+  "ch1_min": -0.8186462,
+  "ch2_mean": 1.5069535833510002
+ },
+ {
+  "name": "ID11_fall",
+  "triggered": true,
+  "timebase": 5e-08,
+  "slope": "NEGative",
+  "ch1_max": 30.263243399999997,
+  "ch1_min": -2.6639334,
+  "ch2_mean": 1.601932450572
+ },
+ {
+  "name": "ID7_rise",
+  "triggered": true,
+  "timebase": 5e-08,
+  "slope": "POSitive",
+  "ch1_max": 30.5965684,
+  "ch1_min": -0.8346458,
+  "ch2_mean": 1.511339851512
+ },
+ {
+  "name": "ID7_fall",
+  "triggered": true,
+  "timebase": 5e-08,
+  "slope": "NEGative",
+  "ch1_max": 30.2219111,
+  "ch1_min": -0.7573143999999999,
+  "ch2_mean": 1.5968082531870003
+ }
+]

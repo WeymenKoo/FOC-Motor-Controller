@@ -262,3 +262,36 @@ the same pins. Room temperature, motor slightly warm from earlier runs.
   (FET, shunt, traces, connector): the A5 energy balance gives ~47 mΩ effective per phase, so ~29 mΩ of path/loss on top of
   18 mΩ of copper. Re-identify with dead-time compensation or at several amps; current-loop Ki and the observer's R·i term
   follow from it.
+
+## B1neg — phase A switch node, phase SINKING current (opposite polarity) · `char/B1neg/20261122_202142` (10 V/div), `…_201958` (5 V/div, clipped)
+SL_POSITION hold rotated 180° electrical (REF POS 0.0357 turns): ia = −I, ib = ic = +I/2. CH1 H1 ref R22-GND. 30 V.
+| | −1 A | −3 A |
+|---|---|---|
+| Falling edge (low-side turn-on, HARD) t10–90 | 6.6 ns (3.7 V/ns) | 7.3 ns (3.4 V/ns) |
+| **Undershoot below ground** | **−7.8 V** | **−9.5 V** |
+| Ringing | ~80–100 MHz, decays in ~80 ns | same |
+| Dead-time plateau before the edge | bus + 0.65 V (high-side body diode) | bus + 0.65 V |
+| Rising edge (high-side turn-on, SOFT) t10–90 | 129 ns | 35 ns |
+- Soft edge and dead-time plateau mirror B1 exactly (129 / 35 ns; ±diode drop): the half-bridge is symmetric there.
+- **Hard edges are asymmetric:** high-side turn-on overshoots the bus by +0.9 V (B1); low-side turn-on undershoots ground by
+  −8 to −10 V, nearly independent of load current (edge-driven: node-capacitance charging / diode recovery current through
+  the inductance of the low-side source path = shunt + its ground connection). Measured to the shunt's ground end; 70 MHz
+  scope, so the true peak is larger.
+- **To check against the DRV8323 datasheet:** negative transient limits of SHx and of the sense inputs SPx/SNx, at this
+  amplitude and ~10 ns duration, and how it scales to 10 A / 56 V. Explains the ~100 ns disturbance on SOx after each edge.
+- The first capture (5 V/div) clipped at −6.85 V and showed a false "22 MHz ±5 V" ringing — scope input overdrive, discarded.
+- Next: repeat at IDRIVE 11 and 7 on this polarity (a slower edge should shrink the undershoot far more than it did the
+  +0.9 V overshoot). Rev B: lower-inductance shunt placement / Kelvin source return, RC snubber or gate resistor on the low side.
+
+## B4neg — IDRIVE sweep on the low-side hard edge (phase A sinking 3 A, 30 V) · `char/B4neg/20261122_202344`
+Registers read back: r3/r4 = 0x3FF/0x7FF (15), 0x3BB/0x7BB (11), 0x377/0x777 (7). CH1 10 V/div.
+| IDRIVE (src/sink) | Falling edge t10–90 | dV/dt | Minimum | Undershoot below the settled level | > 1 V below for |
+|---|---|---|---|---|---|
+| 15 (1000/2000 mA, DRV8323 power-on default, in use) | 7.1 ns | 3.45 V/ns | −10.0 V | 9.5 V | 22.5 ns |
+| 11 (440/880 mA) | 8.9 ns | 2.75 V/ns | −2.7 V | 2.1 V | 8.0 ns |
+| 7 (190/380 mA) | 18.4 ns | 1.33 V/ns | −0.76 V | 0.2 V | 0 ns |
+- The undershoot collapses with a modest reduction of the gate current: **IDRIVE 11 costs 1.8 ns of edge time and removes
+  78 % of it; IDRIVE 7 removes it.** Together with B4 (high-side edge: overshoot 0.97 → 0.61 → 0.11 V) the trade-off is one-sided.
+- **Recommendation (no longer provisional): do not run IDRIVE 15 on this layout. Default `p_drv_idrive` = 11, or 7 if the
+  driver's negative-transient rating or EMI calls for it** (hard-edge loss at 3 A / 30 V: 0.35 → ~0.4 → ~0.8 µJ per edge).
+  Re-check at 10 A / higher bus under supervision.

@@ -24,8 +24,9 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
 | Bus-voltage measurement | Reads 0.36 % low at 30 V (DMM 30.04 V vs 29.93 V); OV / UV trips within 0.1 V of their settings |
 | Supply rails | +3V3 at the scope noise floor, +1 mV rms while spinning; +5V carries ~100 mV p-p at 120–160 kHz from its own converter at light load (not from the bridge) |
 | Switch node, 3 A | Hard edge 7.9 ns (3.1 V/ns), overshoot +0.9 V on 30 V; soft edge 38 ns (current-driven). Scope-limited: real edges are faster |
+| Switch node, phase sinking 3 A | Low-side turn-on is the hard edge: 7.3 ns, **undershoot −9.5 V below ground** (−7.8 V at 1 A), ringing ~80–100 MHz for ~80 ns; soft edge mirrors the sourcing case |
 | Dead-time | 189–213 ns at the switch node (the MCU's 200 ns); body-diode plateau −1.0 V. Voltage error ≈ 0.3 V at 30 V |
-| Gate-drive strength (DRV8323 IDRIVE) | 1000 → 440 → 190 mA source: rise 7.8 → 15.9 → 25.5 ns, overshoot 0.97 → 0.61 → 0.11 V; soft edge and dead-time unaffected |
+| Gate-drive strength (DRV8323 IDRIVE) | High-side edge, 1000 → 440 → 190 mA: rise 7.8 → 15.9 → 25.5 ns, overshoot 0.97 → 0.61 → 0.11 V. **Low-side edge: undershoot 9.5 → 2.1 → 0.2 V** for 7.1 → 8.9 → 18.4 ns |
 | Bus ripple | Static hold: ~20 mV p-p between edges, ±0.45 V / 20 ns spikes at hard edges. Under real load (21 W at 3000 rpm): 79 mV p-p |
 | Idle / overhead power | MCU + regulators 0.39 W, gate driver awake +0.36 W, switching at zero current +0.81 W |
 | No-load input power | 6.1 W at 1000 rpm, 13.3 W at 2000 rpm, 21.1 W at 3000 rpm (sensorless closed loop) |
@@ -44,6 +45,9 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
 - **Short-circuit protection is the gate driver's VDS monitor, not the firmware.** The firmware trip needs up to ~60 µs; a
   phase-to-phase fault at 56 V through ~19 µH rises ~3 A/µs. The driver's trip point still has to be verified on the bench.
 - **Current sensing at high duty:** reconstruct phase C as −(ia + ib), or keep its low-side window ≥ 3 µs (duty ≤ ~92 %).
+- **Switch-node undershoot:** −8 to −10 V below ground for ~10 ns at every low-side hard turn-on (phase sinking current), at
+  30 V / 3 A with the default gate current (2.7 V at 440/880 mA, none at 190/380 mA). Check against the gate driver's
+  negative-transient ratings before raising current or bus voltage.
 - **Dead-time voltage error ≈ 1 % of the bus** (0.3 V at 30 V) for |I| ≳ 1 A, current-dependent below. It limits low-speed
   torque linearity and blocks high-frequency-injection sensing on this low-inductance motor; compensation or a shorter
   (verified) dead-time is needed.
@@ -51,8 +55,8 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
   permanently active.
 - **Stops must coast.** The bus capacitance (~350 µF) holds far less energy than the rotor at speed; the bench supply cannot
   sink regenerated energy.
-- **Gate drive:** IDRIVE 440/880 mA is a reasonable default (one third less overshoot, lower EMI, small switching-loss cost) —
-  to be confirmed at higher current.
+- **Gate drive: do not use the driver's default (IDRIVE 1000/2000 mA).** At 440/880 mA the low-side undershoot drops from
+  9.5 V to 2.1 V for 1.8 ns of extra edge time; at 190/380 mA it is gone. Recommended default 440/880 mA.
 - **Motor constants:** the stored phase resistance (98 mΩ) is ~5.5× the winding's 18 mΩ; identification at ≤ 1 A is biased by
   the dead-time error. The loop sees winding + bridge path (~47 mΩ effective from an energy balance). Re-identify at several
   amps or with dead-time compensation.
@@ -64,6 +68,7 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
 |---|---|
 | Route all three current-sense outputs to inputs both ADCs can sample | Phase C sampling-order failure (C1 / C1b) |
 | Hardware E-stop input independent of the gate-driver enable | Rev 1: the E-stop is the bench supply's switch |
+| Lower-inductance low-side source path (shunt placement, Kelvin return), snubber or low-side gate resistor | −8 to −10 V switch-node undershoot at low-side turn-on vs +0.9 V overshoot at high-side turn-on (B1 / B1neg) |
 | Shorter or tunable dead-time, gate resistors for edge control | Dead-time error (B1), IDRIVE trade-off (B4) |
 | Encoder read without blocking the control interrupt (faster SPI or DMA) | 3.5 µs of a 40 µs control period spent waiting on SPI |
 | Bus capacitance / braking path sized for regeneration | Rotor energy vs bus energy |
