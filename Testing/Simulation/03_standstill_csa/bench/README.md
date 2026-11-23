@@ -4,7 +4,7 @@ Bench correlation for deck 03, 2026-10-30, at 12 V (approved switching scope).
 
 **First attempt (ID_R, 0.8 A):** abandoned. The 48 mV CSA pulse at 0.8 A is the same size as the 35-65 mV switching pickup on TP20, so no CH1 trigger could separate them. Sim for that case: `03b_standstill_12V_bench.asc`.
 
-**Run used:** I/f spin, `RUN IF_SPIN` + `REF IF 2 300` (2 A, 300 rpm, default 100 rpm/s ramp), MN601-S clamped, KA3005P 12 V / 3 A. Sent over UART by Claude with `Firmware/tools/foclink_run.py` (heartbeat on), user-approved for this session in place of the FOCLink Spin window; ARM, CSA_CAL, spin 5.4 s, STOP, DISARM; no faults. Log: `spin1_runlog.txt`.
+**Run used:** I/f spin, `RUN IF_SPIN` + `REF IF 2 300` (2 A, 300 rpm, default 100 rpm/s ramp), MN601-S clamped, KA3005P 12 V / 3 A. Sent over UART with `Firmware/tools/foclink_run.py` (heartbeat on), in place of the FOCLink Spin window; ARM, CSA_CAL, spin 5.4 s, STOP, DISARM; no faults. Log: `spin1_runlog.txt`.
 Scope: CH1 on TP20 (SOA), 10x, 50 mV/div, 20 MHz BWL, 2 ms/div, 10 Mpts at 3.2 ns, free-running single frame 5 s into the spin.
 
 **Sim it is compared with:** `03c_standstill_12V_2A.asc` = deck 03 with `Vbus=12`, `Iset=2` (standstill; at the phase-A peak the I/f vector lies along alpha and the back-EMF at 300 rpm is ~0.6 V, so one PWM period there matches the standstill hold).

@@ -1,6 +1,6 @@
 # 02_leg_switching / bench
 
-Bench correlation for deck 02, 2026-10-30. **Run at 12 V, not 30 V:** every approved switching scope in Firmware/CLAUDE.md is a 12 V bench supply (motor modes are refused above 15 V).
+Bench correlation for deck 02, 2026-10-30. **Run at 12 V, not 30 V:** every approved switching test in the firmware notes uses a 12 V bench supply (motor modes are refused above 15 V).
 
 **Setup:** KA3005P 12 V / 2 A, MN601-S connected and clamped. `RUN ID_R` from FOCLink (ARM, CSA_CAL, ID_R; `p_id_current` 0.8 A, so phase A +0.8 A, B/C -0.4 A in the first step). DHO804 CH1 on TP38 (SHA, phase-A switch node), 10x probe, spring ground, 2 V/div, 20 ns/div, 1.25 GSa/s, rising trigger.
 
