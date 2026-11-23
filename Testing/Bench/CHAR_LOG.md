@@ -524,3 +524,20 @@ and stops on a missed capture.)
   on this leg but does not remove it. Its source is the layout of leg C.
 - Envelope: IDRIVE 7 keeps the worst leg at ≈ −3.5 V (pad) up to 5 A with no trend in current; IDRIVE 11 is not recommended.
   Below 7 (codes 4–6: 60–120 mA source) is the next thing to try if more margin is wanted. Rev B: fix leg C's loop.
+
+## B10b — phase C, IDRIVE 7 / 6 / 5 / 4 at 5 A, 30 V · `char/B10/20261122_213218`
+Same placement throughout (CH1 H3 / R32-GND, one hold of the probe). Input power is the whole board during the hold.
+| IDRIVE | Low-side turn-on: t10–90 / minimum | High-side turn-on: t10–90 / peak | Input power |
+|---|---|---|---|
+| 7 | 18.2 ns / −1.01 V | 26.6 ns / 29.4 V (no overshoot) | 2.58 W |
+| 6 | 20.3 ns / −0.77 V | 28.8 ns / 29.4 V | 2.58–2.61 W |
+| 5 | 24.7 ns / −0.84 V | 34.2 ns / 29.4 V | 2.61–2.67 W |
+| 4 | 29.8 ns / −0.76 V | 38.8 ns / 29.4 V | 2.67–2.70 W |
+- Within this run there is nothing left to gain below IDRIVE 7: the minimum is the body-diode plateau plus ~0.3 V at every
+  code; slower codes only add edge time (18 → 30 ns) and ~0.1 W. No gate-drive faults down to code 4.
+- **Repeatability problem:** the same point (IDRIVE 7, 5 A, phase C) read −3.51 V / 31.3 V peak in the previous run and
+  −1.01 V / 29.4 V here, with the probe re-seated in between. The edge is as fast here (max slew 2.3 vs 1.9 V/ns), so this is
+  not a band-limited contact; the earlier, larger reading is more likely pickup in a larger ground-spring loop, or a different
+  spot on the pad. **Hand-held readings of the ringing are placement-dependent by ~2.5 V.** Trends inside one placement hold
+  (IDRIVE sweeps, current sweeps); comparisons across placements — phase C vs A / B (B7), TP38 vs the pad at 30 V (B9) — are
+  not established until repeated. The conservative (larger) values are kept for the envelope.
