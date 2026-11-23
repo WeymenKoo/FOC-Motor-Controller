@@ -118,3 +118,101 @@ a1.legend(frameon=False, ncol=2, loc="lower right"); a1.text(t[0] + 0.2, 31.0, "
 a2.plot(t, a - bb, color=AQUA); a2.set(xlabel="time (ms)", ylabel="A − B, line-line (V)", ylim=(-4.2, 4.2))
 a2.text(t[0] + 0.2, 3.5, "3.04 V peak at 200 Hz electrical (858 rpm)  →  flux constant 1.396 mV·s", fontsize=9)
 fig.tight_layout(); save(fig, "fig9_back_emf.png")
+
+# ============================================================== second set: more of the captured waveforms
+import json
+def J(*p): return json.load(open(os.path.join(H, "char", *p)))
+def edge_overlay(ax, items, win=(-40, 160), ylim=None):
+    for path, col, lab in items:
+        z = Z(*path); t, v = z["t"] * 1e9, z["ch1"]; m = (t > win[0]) & (t < win[1]); ax.plot(t[m], v[m], color=col, label=lab)
+    ax.set_xlabel("time from the edge (ns)"); ax.legend(frameon=False, loc="upper right")
+    if ylim: ax.set_ylim(*ylim)
+
+# 10 -- first look at the switch node (phase sourcing)
+zp, zr, zf = Z("B1", "20261122_171957", "I3A_period.npz"), Z("B1", "20261122_171957", "I3A_rise.npz"), Z("B1", "20261122_171957", "I3A_fall.npz")
+fig = plt.figure(figsize=(11, 4.2)); gs = fig.add_gridspec(1, 3, width_ratios=[1.5, 1, 1]); a0, a1, a2 = (fig.add_subplot(g) for g in gs)
+a0.plot(zp["t"] * 1e6, zp["ch1"], color=BLUE, lw=1.4); a0.set(xlabel="time (µs)", ylabel="switch node, phase A (V)", title="One PWM period (40 µs)", ylim=(-4, 36))
+a0.text(-30, 32.5, "high side on", fontsize=8.5, color=MUTED, ha="center"); a0.text(-10, 3, "low side on", fontsize=8.5, color=MUTED, ha="center")
+t, v = zr["t"] * 1e9, zr["ch1"]; m = (t > -260) & (t < 120); a1.plot(t[m], v[m], color=BLUE); a1.set(xlabel="time from the edge (ns)", title="Rising edge (hard)", ylim=(-4, 36))
+a1.annotate("dead-time: low-side body\ndiode conducts, ≈ −1 V", (-120, -1), xytext=(-250, 12), fontsize=8.5, arrowprops=dict(arrowstyle="-", color=MUTED, lw=0.8))
+a1.annotate("7.9 ns, +0.9 V overshoot", (5, float(v[m].max())), xytext=(-250, 33), fontsize=8.5, arrowprops=dict(arrowstyle="-", color=MUTED, lw=0.8))
+t, v = zf["t"] * 1e9, zf["ch1"]; m = (t > -120) & (t < 260); a2.plot(t[m], v[m], color=BLUE); a2.set(xlabel="time from the edge (ns)", title="Falling edge (soft)", ylim=(-4, 36))
+a2.text(40, 18, "38 ns: the load current\ncharges ~5 nF of node\ncapacitance", fontsize=8.5, color=INK)
+fig.suptitle("First look at the switch node: phase A sourcing 3 A, 30 V bus, driver-default gate current", x=0.01, ha="left", fontsize=11, fontweight="bold")
+fig.tight_layout(); save(fig, "fig10_switch_node_sourcing.png")
+
+# 11 -- three phases
+fig, ax = plt.subplots(figsize=(8.2, 4.2))
+edge_overlay(ax, ((("B11", "A_20261122_213858", "ID11_3A_sink_fall.npz"), BLUE, "phase A"), (("B7", "B_20261122_210217", "B_sink_fall.npz"), AQUA, "phase B"),
+                  (("B11", "C_20261122_213623", "ID11_3A_sink_fall.npz"), ORANGE, "phase C")), ylim=(-9, 34))
+limit(ax, -7, "SHx rating −7 V"); ax.set(ylabel="switch node (V)", title="Low-side turn-on on each phase (sinking 3 A, 30 V, 440 / 880 mA gate current)")
+ax.annotate("C: −4.6 V", (8, -4.56), xytext=(40, -5.6), fontsize=9, arrowprops=dict(arrowstyle="-", color=MUTED, lw=0.8)); ax.annotate("A: −2.8 V, B: −3.1 V", (8, -2.9), xytext=(40, -2.9), fontsize=9, va="center", arrowprops=dict(arrowstyle="-", color=MUTED, lw=0.8))
+save(fig, "fig11_three_phases.png")
+
+# 12 -- bus voltage and current overlays (zoomed on the region near ground)
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 4.0), sharey=True)
+edge_overlay(a1, ((("B8", "20261122_210544", "V12_sink_fall.npz"), AQUA, "12 V bus"), (("B8", "20261122_210736", "V24_sink_fall.npz"), BLUE, "24 V bus"),
+                  (("B4neg", "20261122_202344", "ID11_fall.npz"), ORANGE, "30 V bus")), win=(-10, 120), ylim=(-8.5, 6))
+a1.set(ylabel="switch node, near ground (V)", title="Bus voltage: phase A, 3 A, 440 / 880 mA"); limit(a1, -7, "SHx rating −7 V")
+a1.text(20, 3.5, "minimum −2.7 V at all three", fontsize=9)
+edge_overlay(a2, ((("B12", "C_20261122_215058", "ID7_5A_sink_fall.npz"), AQUA, "5 A"), (("B12", "C_20261122_215058", "ID7_7.5A_sink_fall.npz"), BLUE, "7.5 A"),
+                  (("B12", "C_20261122_215058", "ID7_10A_sink_fall.npz"), ORANGE, "10 A")), win=(-10, 120), ylim=(-8.5, 6))
+a2.set(title="Current: phase C, 30 V, 190 / 380 mA"); limit(a2, -7, "−7 V"); a2.text(20, 3.5, "minimum −0.8 / −0.9 / −1.1 V", fontsize=9)
+fig.tight_layout(); save(fig, "fig12_voltage_and_current.png")
+
+# 13 -- phase C sampling window (timing from the switch node; ADC instants from the firmware's sequence and clock)
+fig, axs = plt.subplots(1, 2, figsize=(11, 3.8), sharey=True)
+for ax, (cm, win) in zip(axs, ((90, 4.0), (95, 2.0))):
+    z = Z("C1b", "20261122_173922", f"C1b_cm{cm}.npz"); t, n = z["t"] * 1e6, z["ch1"]; m = (t > -1.0) & (t < win + 2.5)
+    ax.plot(t[m], n[m], color=BLUE); ax.set(title=f"{cm} % duty: low-side window {win:g} µs", ylim=(-6, 40), xlabel="time from phase C's falling edge (µs)")
+    ax.axvline(win / 2, color=MUTED, lw=1.2, ls=(0, (2, 2))); ax.axvspan(win / 2 + 0.87, win / 2 + 1.45, color=CRIT, alpha=0.18, lw=0)
+    ax.text(win / 2 - 0.06, 37, "A and B\nsampled", ha="right", va="top", fontsize=8.5, color=MUTED); ax.text(win / 2 + 0.9, 37, "C sampled", ha="left", va="top", fontsize=8.5, color=CRIT)
+    ax.text(win / 2, 8, "low side on:\nshunt carries the current", ha="center", fontsize=8.5, color=INK)
+axs[0].set_ylabel("phase C switch node (V)"); axs[0].text(4.6, 14, "still inside\nthe window", fontsize=8.5, color=INK, ha="center"); axs[1].text(2.75, 14, "window already\nclosed: reads half", fontsize=8.5, color=INK, ha="left")
+fig.suptitle("Why phase C reads wrong at high duty: it is converted 0.87–1.45 µs after A and B", x=0.01, ha="left", fontsize=11, fontweight="bold")
+fig.tight_layout(); save(fig, "fig13_phase_c_sampling.png")
+
+# 14 -- supply rails while spinning
+z = Z("A3", "20261122_181829", "spin2000_OFF.npz"); t = z["t"] * 1e6
+fig, (a1, a2) = plt.subplots(2, 1, figsize=(8.6, 4.4), sharex=True)
+a1.plot(t, z["ch1"] * 1e3, color=BLUE, lw=1.2); a1.set(ylabel="+3.3 V rail, AC (mV)", ylim=(-80, 80), title="Supply rails while the motor spins at 2000 rpm (AC-coupled)")
+a2.plot(t, z["ch2"] * 1e3, color=ORANGE, lw=1.2); a2.set(ylabel="+5 V rail, AC (mV)", ylim=(-80, 80), xlabel="time (µs)")
+a2.text(0.01, 0.06, "≈ 100 mV p-p at 120–160 kHz: the 5 V converter's own light-load ripple", transform=a2.transAxes, fontsize=8.5, color=MUTED)
+fig.tight_layout(); save(fig, "fig14_rails.png")
+
+# 15 -- bus ripple, static hold
+z = Z("B5", "20261122_174829", "I3A_period.npz"); t = z["t"] * 1e6
+fig, (a1, a2) = plt.subplots(2, 1, figsize=(8.6, 4.4), sharex=True, gridspec_kw={"height_ratios": [1, 1.4]})
+a1.plot(t, z["ch2"], color=BLUE, lw=1.2); a1.set(ylabel="phase A node (V)", title="Bus ripple over one PWM period (3 A hold, 30 V, bus AC-coupled)")
+a2.plot(t, z["ch1"] * 1e3, color=ORANGE, lw=1.2); a2.set(ylabel="bus, AC (mV)", xlabel="time (µs)")
+a2.text(0.01, 0.9, "≈ 20 mV between edges; spikes of up to ±0.4 V for ~20 ns at the hard edges", transform=a2.transAxes, fontsize=8.5, color=MUTED)
+fig.tight_layout(); save(fig, "fig15_bus_ripple.png")
+
+# 16 -- brown-out
+bo = J("NP", "20261122_195422", "results.json")["brownout"]; dn, up = bo[:27], bo[27:]
+fig, ax = plt.subplots(figsize=(8.0, 4.0))
+ax.plot([r["psu_set"] for r in dn], [r["psu_ma"] for r in dn], "-o", color=BLUE, ms=5, mec=SURF, mew=1.2, label="supply falling")
+ax.plot([r["psu_set"] for r in up], [r["psu_ma"] for r in up], "-o", color=ORANGE, ms=5, mec=SURF, mew=1.2, label="supply rising")
+ax.axvspan(3.5, 5.5, color=CRIT, alpha=0.10, lw=0); ax.text(5.8, 3, "no answer at 4 V;\nrestarts between 5 and 6 V", fontsize=9, color=CRIT, va="bottom")
+ax.annotate("64 mA at 5 V", (5, 64), xytext=(8, 66), fontsize=9, arrowprops=dict(arrowstyle="-", color=MUTED, lw=0.8)); ax.annotate("13 mA at 30 V", (30, 13), xytext=(24, 22), fontsize=9, arrowprops=dict(arrowstyle="-", color=MUTED, lw=0.8))
+ax.set(xlabel="bus voltage (V)", ylabel="supply current, board idle (mA)", ylim=(0, 75), title="Brown-out sweep: constant-power input, clean shut-down and restart"); ax.legend(frameon=False, loc="upper right")
+save(fig, "fig16_brownout.png")
+
+# 17 -- regeneration against time (values polled over the serial link, ~45 ms apart)
+fig, (a1, a2) = plt.subplots(2, 1, figsize=(8.6, 4.8), sharex=True)
+for path, col, lab in ((("REGEN", "12V_20261122_221408", "results.json"), AQUA, "from 1000 rpm"), (("REGEN", "12V_20261122_221703", "results.json"), BLUE, "from 2000 rpm"), (("REGEN", "12V_20261122_221751", "results.json"), ORANGE, "from 2500 rpm")):
+    r = [x for x in J(*path) if x.get("brake_a") == 3.0][-1]; s = np.array(r["samples"]); s = s[s[:, 0] < 0.9]
+    a1.plot(s[:, 0] * 1e3, s[:, 1], "-o", color=col, ms=4, mec=SURF, mew=1, label=lab); a2.plot(s[:, 0] * 1e3, s[:, 2], "-o", color=col, ms=4, mec=SURF, mew=1)
+a1.set(ylabel="speed (rpm)", title="Braking at 3 A to 300 rpm on a 12 V bus"); a1.legend(frameon=False, loc="upper right")
+a2.axhline(29.97, color=CRIT, lw=1.2, ls=(0, (5, 3))); a2.text(880, 30.5, "clamp level 29.97 V", color=CRIT, fontsize=9, ha="right"); a2.set(ylabel="bus voltage (V)", xlabel="time after the speed command dropped (ms)", ylim=(10, 33))
+a2.text(880, 13.2, "the bus falls back as the board's own consumption drains it", fontsize=8.5, color=MUTED, ha="right")
+fig.tight_layout(); save(fig, "fig17_regen_time.png")
+
+# 18 -- why identification read 98 mOhm
+fw = J("FW", "20261122_204048", "results.json")["hold"]; I = [h["ia"] for h in fw]; R = [1e3 * h["v_alpha"] / h["ia"] for h in fw]
+fig, ax = plt.subplots(figsize=(7.6, 4.0)); ax.plot(I, R, "-o", color=BLUE, ms=7, mec=SURF, mew=1.5)
+for x, y in zip(I, R): ax.annotate(f"{y:.0f}", (x, y), xytext=(0, 9), textcoords="offset points", ha="center", fontsize=9)
+ax.axhline(18, color=AQUA, lw=1.5); ax.text(5.15, 19.5, "winding, 4-wire: 18 mΩ", fontsize=9, ha="right"); ax.axhline(30, color=MUTED, lw=1.2, ls=(0, (2, 2))); ax.text(5.15, 32, "winding + bridge path: ≈ 30 mΩ", fontsize=9, ha="right", color=MUTED)
+ax.axhline(98, color=CRIT, lw=1.2, ls=(0, (5, 3))); ax.text(0.75, 86, "value identified in September\nat ≤ 1 A: 98 mΩ", fontsize=9, ha="left", color=CRIT)
+ax.set(xlabel="hold current (A)", ylabel="apparent resistance, V ÷ I (mΩ)", ylim=(0, 160), xlim=(0.7, 5.2), title="The bridge's voltage error looks like resistance at low current")
+save(fig, "fig18_apparent_resistance.png")
