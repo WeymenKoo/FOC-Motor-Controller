@@ -2,7 +2,7 @@
 
 Technical notes from a full design cycle: idea → theory → schematic → simulation → layout → fab → bring-up plan. Written as a knowledge refresher as much as a build log, so each section starts with the background needed to follow the decision.
 
-**Status:** Rev 1 design-frozen, fabricated and partly bench-validated on a 12 V supply: MCU, gate driver (SPI), current sensing and PWM verified; a T-Motor MN601-S identified (R, L, back-EMF) and spun open-loop up to 1000 rpm. Not yet tested on the 12S bus, under load, or in closed-loop FOC. The design notes below are analytical or derived from the fabrication files.
+**Status:** Rev 1 design-frozen, fabricated and bench-characterized up to 30 V and 10 A (2026-11-22): switch-node behaviour, gate-drive and protection settings, current-sense accuracy, dead-time, regeneration and thermal rise are measured and reported in [`Testing/Bench/README.md`](Testing/Bench/README.md), with the resulting firmware envelope and Rev B design inputs. Not yet tested on the 12S bus, under shaft load, or with the encoder. The design notes below are analytical or derived from the fabrication files; where they differ from the measured report, the report takes precedence.
 
 
 ## Repository layout
@@ -14,7 +14,7 @@ Technical notes from a full design cycle: idea → theory → schematic → simu
 | `Hardware/Libraries/` | Project-local symbols, footprints and 3D models (referenced via `${KIPRJMOD}/Libraries/`) |
 | `Hardware/Project Outputs/` | BOM, pick-and-place, netlist, fabrication package (Rev 1), schematic PDF |
 | `Testing/Simulation/` | LTspice bench-correlation suite (hot-plug, half-bridge switching, current sense) with DHO804 bench captures and comparisons; see `Testing/Simulation/README.md` |
-| `Testing/Bench/` | Bench test plans and procedures |
+| `Testing/Bench/` | **Rev 1 power-stage characterization report** (firmware envelope, Rev B design inputs), test log, raw captures and probe map; see `Testing/Bench/README.md` |
 | `Documentation/` | Design rationale, layout/manufacturing review, board renders, RevC action summary |
 | `Firmware/`, `GUI/` | STM32G431 firmware and the FOCLINK GUI (kept in a separate repository, not published here) |
 
