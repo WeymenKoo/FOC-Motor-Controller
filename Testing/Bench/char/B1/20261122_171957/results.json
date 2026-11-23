@@ -1,0 +1,56 @@
+[
+ {
+  "name": "I1A_period",
+  "triggered": true,
+  "timebase": 1e-05,
+  "slope": "POSitive",
+  "ch1_max": 29.933483,
+  "ch1_min": -1.02400512,
+  "ch2_mean": 1.6740400985730002
+ },
+ {
+  "name": "I1A_rise",
+  "triggered": true,
+  "timebase": 5e-08,
+  "slope": "POSitive",
+  "ch1_max": 30.2334845,
+  "ch1_min": -1.06867201,
+  "ch2_mean": 1.6938103723650002
+ },
+ {
+  "name": "I1A_fall",
+  "triggered": true,
+  "timebase": 5e-08,
+  "slope": "NEGative",
+  "ch1_max": 29.854815939999998,
+  "ch1_min": -1.0400052,
+  "ch2_mean": 1.649899903491
+ },
+ {
+  "name": "I3A_period",
+  "triggered": true,
+  "timebase": 1e-05,
+  "slope": "POSitive",
+  "ch1_max": 30.074150369999998,
+  "ch1_min": -1.1046721899999998,
+  "ch2_mean": 1.7334724414679998
+ },
+ {
+  "name": "I3A_rise",
+  "triggered": true,
+  "timebase": 5e-08,
+  "slope": "POSitive",
+  "ch1_max": 30.484152419999997,
+  "ch1_min": -1.1560057799999999,
+  "ch2_mean": 1.786453957062
+ },
+ {
+  "name": "I3A_fall",
+  "triggered": true,
+  "timebase": 5e-08,
+  "slope": "NEGative",
+  "ch1_max": 30.302151509999998,
+  "ch1_min": -1.3906736199999998,
+  "ch2_mean": 1.6783578592110002
+ }
+]

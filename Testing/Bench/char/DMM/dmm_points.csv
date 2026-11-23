@@ -1,0 +1,4 @@
+time,label,psu_v,psu_ma,board_vbat_v,board_vdda_mv,dmm_reading
+18:21:13,bus_H8_H9,30.000,12,29.933,3300.6,30.04
+18:22:06,3V3_TP9,30.000,12,29.936,3303.9,3.295
+18:22:21,5V_TP7,,,,,"5.018 (user, same power-on as TP9)"
