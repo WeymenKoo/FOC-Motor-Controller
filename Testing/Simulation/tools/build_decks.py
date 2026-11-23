@@ -1,8 +1,8 @@
-"""Builds the LTspice decks for the FOC Motor Controller Rev 1 bench-correlation suite.
+"""Builds the LTspice decks for the FOC Motor Controller Rev A bench-correlation suite.
 Every connection is a drawn wire; FLAGs are used only for ground, and to *name* a wire
 (so .meas statements and B-source expressions can refer to it).
 
-Design values come from the Rev 1 KiCad netlist (Project Outputs/Netlist) and the
+Design values come from the Rev A KiCad netlist (Project Outputs/Netlist) and the
 firmware (firmware notes, app_config.h, app_params.c defaults)."""
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -105,7 +105,7 @@ def deck01():
 
     sh.text(-80, -96, 'PROBE: DHO804 CH1 here (VBUS at the board side of the XT60)', size=1)
     sh.rect(400, -112, 1360, 400)
-    sh.text(416, 368, 'FOC controller Rev 1 board (+VPROT net): C34/C37/C39 + 12x4u7 (C4,C5,C40..C80) + D1', size=1)
+    sh.text(416, 368, 'FOC controller Rev A board (+VPROT net): C34/C37/C39 + 12x4u7 (C4,C5,C40..C80) + D1', size=1)
     sh.text(-80, 192, 'KA3005P (30 V / 5 A).\nHot-plug = XT60 mated into a\nlive supply at t = tplug.\nThe supply output is stiff\non this time scale (its 5 A\nCC loop is ms-slow).', size=1)
     sh.text(96, 64, '2 x 1 m 18 AWG + XT60\ncontact resistance', size=1)
 

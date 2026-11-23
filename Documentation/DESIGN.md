@@ -1,4 +1,4 @@
-# Rev 1 design decisions
+# Rev A design decisions
 
 Why the board is built the way it is. Measured behaviour, and what the bench changed, is in the
 [test and bring-up report](../Testing/README.md). Where the two disagree, the report wins.
@@ -23,14 +23,14 @@ motor current almost directly. Three consequences:
 
 ## How it got here
 
-| Rev | Configuration | Lesson |
+| Iteration | Configuration | Lesson |
 |---|---|---|
-| A | STM32F405, 40 V FETs | 40 V parts on a 50.4 V bus are out of rating at rest. Check V<sub>DS</sub> against the worst transient first. |
-| B | STM32G431, DRV8323S, 1.5 mΩ FETs | The lowest R<sub>DS(on)</sub> had the highest total loss. Select on figure of merit, not one parameter. |
-| C | Hot-swap, dual XT60, USB-C, 3 regulators, off-board encoder, 19 sheets | Over-correction: every fault handled on every board. |
-| 1 | Built | Each block classed required or discretionary, then placed on the right board. |
+| Draft 1 | STM32F405, 40 V FETs | 40 V parts on a 50.4 V bus are out of rating at rest. Check V<sub>DS</sub> against the worst transient first. |
+| Draft 2 | STM32G431, DRV8323S, 1.5 mΩ FETs | The lowest R<sub>DS(on)</sub> had the highest total loss. Select on figure of merit, not one parameter. |
+| Draft 3 | Hot-swap, dual XT60, USB-C, 3 regulators, off-board encoder, 19 sheets | Over-correction: every fault handled on every board. |
+| **Rev A** | Built | Each block classed required or discretionary, then placed on the right board. |
 
-What Rev 1 removed and why:
+Drafts 1–3 were never fabricated. What Rev A removed and why:
 
 | Removed | Why |
 |---|---|
@@ -87,7 +87,7 @@ make a loop through cable shields. Phase and bus terminals share one edge next t
 **10. Interfaces: CAN-FD to the host, UART to the bench GUI, SWD for debug.**
 CAN-FD (TCAN1044) for six nodes on one bus; UART (FOCLINK) for the bench console; no USB on the joint board.
 
-## Known Rev 1 compromises (decided, not discovered)
+## Known Rev A compromises (decided, not discovered)
 
 - No thermal vias under the low-side FETs (switch node kept on L1 for EMI). Rated 10 A until measured.
 - Board NTC at board centre, 22 mm from the FETs; it under-reads.

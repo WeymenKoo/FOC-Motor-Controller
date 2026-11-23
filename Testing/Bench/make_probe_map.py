@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""make_probe_map.py -- PROBE_MAP.png / .pdf: top view of the Rev 1 board with every test point, probe pad and usable
+"""make_probe_map.py -- PROBE_MAP.png / .pdf: top view of the Rev A board with every test point, probe pad and usable
 ground pad labelled, colour-coded by how safe it is to touch with a hand-held probe while powered.
 
 Labels are placed collision-free with leader lines (no label may hide another or sit on another pad). Ground pads: only
@@ -196,7 +196,7 @@ def main():
 
     lx = W + 40; ly = 30
     f = QFont("Helvetica"); f.setPixelSize(56); f.setBold(True); p.setFont(f); p.setPen(QColor("#FFFFFF"))
-    p.drawText(QPointF(lx, ly + 50), "FOC Rev 1 -- probe map (top side)"); ly += 100
+    p.drawText(QPointF(lx, ly + 50), "FOC Rev A -- probe map (top side)"); ly += 100
     f.setPixelSize(28); f.setBold(False); p.setFont(f)
     for cat, (col, txt) in CAT.items():
         c = QColor(col)

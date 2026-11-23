@@ -1,8 +1,8 @@
-# Characterization log — Rev 1 (CHARACTERIZATION_PLAN.md)
+# Characterization log — Rev A
 
 Bench 2026-11-22. KA3005P 30.0 V, DHO804 (70 MHz, 10x passive, hand-held), MN601-S as a stationary inductive load,
 firmware 0.6.1+sl (bench build). Raw data per test under `char/<test>/<timestamp>/` (npz + screenshots + json).
-Probe points: `PROBE_MAP.png`. Every probe change with the PSU output off (user rule).
+Probe points: `PROBE_MAP.png`. Every probe change with the PSU output off.
 
 ## A1 — bus-voltage reading (no probes) · `char/A12/20261122_170402`
 | PSU (V) | 30 | 24 | 18 | 12 | 8 |
@@ -65,7 +65,7 @@ PWM_TEST (cm+0.8, cm, cm) %, open loop (~1–1.7 A; the current itself varies wi
 | 98 % | 0.5 µs | +1.283 | −0.610 | **−0.074** | +0.598 |
 | 98.8 % | 0.16 µs | +0.550 | −0.414 | −0.044 | +0.092 (all wrong) |
 - **Phase C's reading fails first** (window < ~2 µs), although B runs the same duty and stays consistent; A and B hold to ~0.5 µs.
-  Phase C's shunt is the one wired reversed on Rev 1 (SNC/SPC swapped) — suspected cause, to confirm on SOC.
+  Phase C's shunt is the one wired reversed on Rev A (SNC/SPC swapped) — suspected cause, to confirm on SOC.
 - **Envelope (provisional):** keep every phase's low-side window ≥ ~2 µs (duty ≤ 95 %) when using all three shunts, or
   reconstruct the highest-duty phase from the other two (A/B valid to ~0.5 µs).
 
@@ -127,7 +127,7 @@ CH1 TP9 (+3V3) ref C41 GND; CH2 TP7 (+5V) ref C10 GND; AC 10 mV/div; random-time
 | Idle (DISARMED) | 15.1 / 2.7 mV | 15.5 / 2.4 mV | 117 / 9.9 mV | 54 / 5.2 mV |
 | Armed (DRV awake, not switching) | 15.1 / 2.5 mV | 14.0 / 2.3 mV | 112 / 9.8 mV | 36 / 4.9 mV |
 | Spinning 2000 rpm (13 W) | 23.0 / 3.2 mV | 17.3 / 3.0 mV | 102 / 8.9 mV | 103 / 9.4 mV |
-- **+3V3 is at the noise floor** at idle; motor switching adds ~1 mV rms. (Rev-1 concern "analog shares digital 3V3": no
+- **+3V3 is at the noise floor** at idle; motor switching adds ~1 mV rms. (Rev-A concern "analog shares digital 3V3": no
   measurable switching pickup on the rail at 13 W; the ADC-side effect is what matters — C1 data.)
 - **+5V: ~100 mV p-p at 120–160 kHz (+ 4.1 MHz edge content), same at idle and spinning** → the 5 V converter's light-load
   (pulse-skipping) ripple, not the bridge. Board load ~12 mA. Check against what +5V feeds; Rev B: FPWM / more output C if it matters.
@@ -143,7 +143,7 @@ CH1 TP9 (+3V3) ref C41 GND; CH2 TP7 (+5V) ref C10 GND; AC 10 mV/div; random-time
 | +5V TP7 | 5.018 V | — | 5.011–5.022 V | agrees |
 
 ## E1 — thermal, SL_POSITION hold (rotor parked), 30 V · `char/E1/20261122_182816` (log.csv + tc_readings.csv)
-K-type thermocouple (user DMM) taped to the phase A low-side FET case; board NTC from telemetry; PSU V·I.
+K-type thermocouple (DMM) taped to the phase A low-side FET case; board NTC from telemetry; PSU V·I.
 | Hold | Time | FET case | Board NTC | PSU | Slope at end |
 |---|---|---|---|---|---|
 | start | — | 26.5 °C | 27.4 °C | — | — |
@@ -581,7 +581,7 @@ Currents are the SOA plateaus in the low-side windows (the last one sampled befo
 - Firmware trip overshoot at these ramp rates: the plateau at the trip is within ~1 A of the ceiling in every case. (The
   "peak" column printed by the script, 13.7–26 A, picked up the SOA edge spikes and is not used.)
 - Not resolved: the driver's reaction time (record at 2 µs per point; datasheet deglitch 4 µs + gate turn-off). The hard firmware
-  ceiling is 22.2 A (95 % of the CSA's linear range), so currents above ~23 A cannot be measured or protected by firmware on Rev 1.
+  ceiling is 22.2 A (95 % of the CSA's linear range), so currents above ~23 A cannot be measured or protected by firmware on Rev A.
 - No damage: every trip cleared with DISARM + CLEAR_FAULT, and the next pulse ran normally.
 
 ## B12 — phase C hard edges up to 10 A, IDRIVE 7, 30 V (firmware 2026-11-22c: 10 A hold cap) · `char/B12/C_20261122_215058`
