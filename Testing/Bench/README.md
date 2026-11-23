@@ -45,7 +45,8 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
 
 - **Short-circuit protection is the gate driver's VDS monitor, not the firmware.** The firmware trip needs up to ~60 µs; a
   phase-to-phase fault at 56 V through ~19 µH rises ~3 A/µs. The driver's trip point still has to be verified on the bench.
-- **Current sensing at high duty:** reconstruct phase C as −(ia + ib), or keep its low-side window ≥ 3 µs (duty ≤ ~92 %).
+- **Current sensing at high duty:** the firmware now rebuilds the phase with the shortest low-side window from the other two
+  (verified: phase C correct at 95 % duty, where it read half before). The highest phase must still stay ≤ ~95 %.
 - **Switch-node undershoot:** −8 to −10 V below ground for ~10 ns at every low-side hard turn-on (phase sinking current), at
   30 V / 3 A with the default gate current (2.7 V at 440/880 mA, none at 190/380 mA). **The driver's absolute maximum on
   the switch-node pin is −7 V for 200 ns**, so the default gate current puts this board outside the rating — and likewise on the shunt-side pins (−4.6 V measured, ±3 V rated).
@@ -56,11 +57,11 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
   permanently active.
 - **Stops must coast.** The bus capacitance (~350 µF) holds far less energy than the rotor at speed; the bench supply cannot
   sink regenerated energy.
-- **Gate drive: do not use the driver's default (IDRIVE 1000/2000 mA).** At 440/880 mA the low-side undershoot drops from
+- **Gate drive: do not use the driver's default (IDRIVE 1000/2000 mA)** — the firmware now caps it at 440/880 mA. At 440/880 mA the low-side undershoot drops from
   9.5 V to 2.1 V for 1.8 ns of extra edge time; at 190/380 mA it is gone. Recommended default 440/880 mA.
 - **Motor constants:** the stored phase resistance (98 mΩ) is ~5.5× the winding's 18 mΩ; identification at ≤ 1 A is biased by
-  the dead-time error. The loop sees winding + bridge path (~47 mΩ effective from an energy balance). Re-identify at several
-  amps or with dead-time compensation.
+  the dead-time error. The loop sees winding + bridge path: 25–30 mΩ from the voltage slope at 4–5 A, with a
+  150–190 mV voltage error on top (not constant even at 5 A). At 1000 rpm the value makes no measurable difference to the observer.
 - **Thermal:** 5 A continuous in one phase costs +10 °C on the FET case; extrapolated +23 °C at 10 A (two points — to be confirmed).
 
 ## Rev B candidates
@@ -78,7 +79,8 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
 
 ## Open items
 
-1. **Re-identify the loop resistance in firmware** (winding 18 mΩ + bridge path) and update the current-loop / observer constants.
+1. Dead-time / voltage-error compensation (150–190 mV measured), then re-tune the current loop for a 25–30 mΩ loop resistance.
+   B vs C raw-reading mismatch of 70–170 mA at 80–90 % duty (scope on SOB / SOC).
 2. Phases B and C, 12 V / 24 V points; undershoot at the driver IC's own pins and at higher current / bus voltage.
 3. Back-EMF capture while coasting (motor flux constant independent of the current sense).
 4. Gate driver over-current trip point and latency; 10 A thermal hold; regeneration step; shorter dead-time (all supervised).

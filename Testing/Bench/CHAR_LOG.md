@@ -319,3 +319,45 @@ CH2 H1, trigger only (long ground lead: its amplitude is not a measurement — i
   a hand-held ×10 probe, so peaks are under-read; 3 A / 30 V only.
 - Second, independent reason not to run IDRIVE 15. Rev B: low-inductance shunt (wide/reverse-geometry or paralleled),
   Kelvin sense routing with an RC filter at the amplifier inputs, shunt close to the FET source.
+
+## FW — firmware changes from the findings, verified on the board · `char/FW/20261122_204048/results.json`
+Flashed 2026-11-22 (parameter page untouched). UART + PSU only, 30 V.
+| Change | Check | Result |
+|---|---|---|
+| Gate drive capped at IDRIVE 11 (a saved 15 is rejected at load) | value after boot; `SET p_drv_idrive 15`; DRV registers | 11; refused (RANGE); r3/r4 = 0x3BB / 0x7BB |
+| Shunt reconstruction: the phase with the shortest low-side window (< 4 µs; C counted 1.8 µs shorter) is rebuilt from the other two | C1 repeat, duties (cm + 0.8, cm, cm) | see table |
+| Over-current check moved ahead of the encoder SPI read | — | not re-measured (needs the scope); expected gain ≤ 3.5 µs in encoder modes only |
+
+| Common mode | ia | ib | ic | Rebuilt | Before the change (ic) |
+|---|---|---|---|---|---|
+| 50 % | +1.139 | −0.558 | −0.562 | none | −0.604 |
+| 80 % | +1.225 | −0.607 | −0.535 | none | −0.623 |
+| 90 % | +0.986 | −0.405 | −0.575 | C | −0.506 |
+| 95 % | +1.581 | −0.804 | **−0.787** | C | **−0.399** |
+| 97 % | +1.395 | −0.857 | −0.523 | C | −0.183 |
+- **95 %: fixed** (ic now matches ib; it read half before). 97 %: phase A's own window is 0.9 µs, so two phases are invalid
+  and no reconstruction can help — duty ≤ ~95 % remains the limit for the highest phase.
+- Open: B and C differ by 70–170 mA at 80 % and 90 % (they should be equal). 80 % is without reconstruction, so this is in
+  the raw readings: a duty-dependent offset (the no-probe batch saw ±66 mA at zero current at 90–96 %). Needs SOB / SOC on the scope.
+
+### Loop resistance from the hold-voltage slope (SL_POSITION holds, v_alpha from the duties)
+| Hold | v_alpha | V / I | Local slope |
+|---|---|---|---|
+| 1 A | 143 mV | 143 mΩ | — |
+| 2 A | 226 mV | 112 mΩ | 82 mΩ |
+| 3 A | 270 mV | 90 mΩ | 44 mΩ |
+| 4 A | 304 mV | 76 mΩ | 34 mΩ |
+| 5 A | 334 mV | 67 mΩ | 30 mΩ |
+- The slope is still falling at 5 A: the dead-time / device voltage error is not constant even there. Fit 2–5 A: 36 mΩ with a
+  157 mV offset; the 4–5 A slope, 30 mΩ, is the better upper bound. Consistent with 18 mΩ winding + shunt 3 + FET ~3 + connector
+  and traces. **Loop resistance ≈ 25–30 mΩ per phase; the stored 98 mΩ is what V / I looks like near 1–3 A.**
+- This also quantifies the voltage error for compensation: ~150 mV at 1 A rising to ~190 mV at 5 A (v_alpha minus 30 mΩ × I).
+
+### Sensorless at 1000 rpm, stored R (98 mΩ) vs measured (36 mΩ), two runs each
+| R used | Flux ratio | id | iq |
+|---|---|---|---|
+| 98 mΩ | 1.035 / 1.032 | −0.06 / +0.01 A | 0.47 / 0.41 A |
+| 36 mΩ | 1.046 / 1.046 | −0.02 / 0.00 A | 0.43 / 0.44 A |
+- **No meaningful difference at 1000 rpm**: R × i is ~20 mV against ~2 V of back-EMF. The 3–5 % flux excess is therefore not
+  a resistance effect (candidates: the flux constant itself, the voltage-error model). The earlier "id ≈ 0.9 A at speed" was
+  seen at higher speed and is not reproduced here; it needs a 3000 rpm run to revisit.
