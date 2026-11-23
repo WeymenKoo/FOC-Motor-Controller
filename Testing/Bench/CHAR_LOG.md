@@ -492,3 +492,16 @@ rating; B8 showed the undershoot does not depend on the bus voltage). CH1 TP38 (
   pad measurements are therefore a fair proxy for the SHx pin, as far as a shunt-ground reference goes.
 - Not covered: the driver's own ground against the shunt ground (the nearest driver-ground pad is 14 mm from TP38), and phase C.
 - IDRIVE 7 removes the undershoot entirely for ~8 ns of extra edge time — the setting to use if more margin is needed at higher current.
+
+### B9 at 30 V · `char/B9/20261122_212347`
+| IDRIVE | Low-side turn-on (hard) t10–90 | Minimum at TP38 | Minimum at the phase pad H1, 30 V |
+|---|---|---|---|
+| 11 | 7.6 ns | **−4.18 V** (3.6 V below the settled level) | −2.66 V |
+| 7 | 18.2 ns | −0.87 V (0.3 V below) | −0.76 V |
+- **At 30 V the sense trace shows 1.5 V more undershoot than the pad at IDRIVE 11** (at 12 V the two agreed: −2.62 / −2.70 V). The
+  12 V result does not carry over, and the expectation written before this run (little new information) was wrong.
+  One capture per point; part of the difference may be the larger probe loop here (ground 4.8 mm away) — not separable by hand.
+- Margin to the −7 V SHx rating on phase A at 3 A / 30 V / IDRIVE 11: ~2.8 V at TP38, not the 4.3 V the pad suggested. Phase C
+  rings about 1.8 V harder at the pad (B7), so its sense trace may sit near −6 V: **little margin left at IDRIVE 11, at only 3 A.**
+- IDRIVE 7 is clean at both points and both voltages. **Recommendation changed: IDRIVE 7 (190 / 380 mA) as the default**, 11 as
+  the upper limit; hard-edge loss rises from ~0.4 to ~0.8 µJ per edge (≈ +20 mW per phase at 25 kHz), negligible.

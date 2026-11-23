@@ -61,8 +61,9 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
   permanently active.
 - **Stops must coast.** The bus capacitance (~350 µF) holds far less energy than the rotor at speed; the bench supply cannot
   sink regenerated energy.
-- **Gate drive: do not use the driver's default (IDRIVE 1000/2000 mA)** — the firmware now caps it at 440/880 mA. At 440/880 mA the low-side undershoot drops from
-  9.5 V to 2.1 V for 1.8 ns of extra edge time; at 190/380 mA it is gone. Recommended default 440/880 mA.
+- **Gate drive: use 190/380 mA (IDRIVE 7); never the driver's default (1000/2000 mA).** The firmware caps it at 440/880 mA,
+  but at that setting the driver's sense trace shows −4.2 V on phase A at 3 A / 30 V and phase C rings harder still, so
+  little is left of the −7 V rating. At 190/380 mA the undershoot is gone (−0.9 V) for ~10 ns of extra edge time.
 - **Motor constants:** the stored phase resistance (98 mΩ) is ~5.5× the winding's 18 mΩ; identification at ≤ 1 A is biased by
   the dead-time error. The loop sees winding + bridge path: 25–30 mΩ from the voltage slope at 4–5 A, with a
   150–190 mV voltage error on top (not constant even at 5 A). At 1000 rpm the value makes no measurable difference to the observer.
