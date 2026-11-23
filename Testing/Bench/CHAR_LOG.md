@@ -425,3 +425,58 @@ Hold vector rotated onto the phase (120° / 240° electrical, +180° for sinking
   leg (distance to the bus capacitors / its shunt return). Still inside the −7 V SHx rating at 3 A with IDRIVE 11, but C is
   the leg that sets the limit: all margins for higher current must be taken on phase C, not A.
 - Rev B: check phase C's half-bridge loop (capacitor placement, shunt and return path) against A and B.
+
+## B8 — phase A edges and bus ripple at 12 V and 24 V, 3 A, IDRIVE 11 · `char/B8/20261122_210544` (12 V), `…_210736` (24 V)
+CH1 H1 / R22-GND; CH2 H8 / H9 AC-coupled. 30 V column from B4 / B4neg / B5. (First pass lost the last two 24 V captures to the
+firmware's 15 s run limit; 24 V was repeated on its own.)
+| | 12 V | 24 V | 30 V |
+|---|---|---|---|
+| High-side turn-on (hard) t10–90 | 9.1 ns | 9.2 ns | 15.9 ns |
+| Overshoot above the settled level | +2.0 V | +0.8 V | +0.6 V |
+| Low-side turn-on (hard) t10–90 | 9.9 ns | 9.4 ns | 8.9 ns |
+| Minimum / undershoot below the settled level | −2.70 / 2.1 V | −2.76 / 2.2 V | −2.66 / 2.1 V |
+| Soft edges t10–90 | 20 ns | 31–32 ns | 35–38 ns |
+| Bus ripple between edges (5–95 %) | 25–27 mV | 8–30 mV | ~20 mV |
+| Bus spikes at the edges, p-p | 0.43–0.68 V | 0.27–0.79 V | ~0.9 V |
+- **The low-side undershoot does not depend on the bus voltage (12 → 30 V) at IDRIVE 11: −2.7 V throughout.** It is set by the
+  gate-drive rate and the current, so the open scaling question is current, not voltage — good news for the 56 V design
+  point, still to be shown above 30 V.
+- Soft-edge time scales with voltage as expected (fixed current charging the node capacitance: ~5 nF).
+- The high-side overshoot is larger at 12 V (+2.0 V) than at 30 V, and the 30 V high-side edge reads slower (15.9 ns vs 9 ns);
+  not explained — FET capacitance rises steeply at low voltage, which changes both. No rating is at stake (≤ 14 V peak on a 12 V bus).
+
+## DTC — observer voltage-error compensation sweep (`p_sl_dtc_v`, observer side, firmware of 2026-11-22) · `char/DTC/20261122_210918`
+Sensorless 1000 rpm, 30 V, no load (phase currents ~0.45 A peak). No probes.
+| Compensation | Flux ratio | Flux ripple (sd) | id | iq |
+|---|---|---|---|---|
+| 0 | 1.033 | 0.006 | +0.01 A | 0.45 A |
+| 50 mV | 1.009 | 0.011 | −0.08 | 0.42 |
+| 100 mV | 0.984 | 0.019 | +0.03 | 0.44 |
+| 150 mV | 0.971 | 0.028 | +0.06 | 0.43 |
+| 200 mV | 0.949 | 0.046 | −0.07 | 0.46 |
+| 0 (repeat) | 1.033 | 0.006 | −0.06 | 0.46 |
+- **The 3 % flux excess is the uncompensated bridge voltage error**: the ratio crosses 1.00 at ~65–70 mV. That matches the hold
+  data (≈ 85 mV per phase at 1 A, ≈ 140 mV above 2 A) scaled to 0.45 A — a compensation of 0.14 V × sat(i / 1 A) fits both.
+- A fixed step with a 0.2 A knee (this implementation) over-corrects around the current zero crossings: ripple grows with the value.
+
+## DTC2 — output-side voltage-error compensation (firmware 2026-11-22b) · `char/DTC2/20261122_211302`
+`p_sl_dtc_v` × sat(i_phase / 1 A) is now added to the output vector (sensorless modes, hardware); the observer uses the command as is.
+| Hold | Commanded vd, off | Commanded vd, 0.14 V | Bridge output (from the duties), either case |
+|---|---|---|---|
+| 1 A | 144 mV (143 mΩ) | 5 mV | 144–145 mV |
+| 2 A | 226 mV (113 mΩ) | 41 mV | 226–227 mV |
+| 3 A | 269 mV (90 mΩ) | 82 mV | 269 mV |
+| 4 A | 304 mV (76 mΩ) | 117 mV | 304 mV |
+| 5 A | 334 mV (67 mΩ) | 149 mV (30 mΩ) | 334–335 mV |
+With compensation the plant the current loop sees is close to linear: 36 mΩ slope 2–5 A (slightly over-corrected at 1 A).
+
+| Sensorless 1000 rpm | Flux ratio | Flux sd | Speed sd | Input power |
+|---|---|---|---|---|
+| 0 | 1.035 | 0.005 | 1.3 rpm | 6.12 W |
+| 0.10 V | 1.012 | 0.014 | 2.3 rpm | 6.15 W |
+| 0.14 V | 1.017–1.020 | 0.022–0.024 | 3.2–4.3 rpm | 6.24 W |
+| 0.18 V | 1.022 | 0.033 | 7.5 rpm | 6.42 W |
+- At speed and light current (0.45 A peak, inside the 1 A knee) the compensation follows the **measured** current, so current
+  noise feeds back into the voltage: ripple × 3–5. **Left off by default (0).** Useful for standstill / low-speed holds
+  (~0.10 V). Next step: drive it from the current reference (or a filtered current) instead of the raw measurement.
+- ISR peak 33.5 µs of 40, 0 overruns. Flash 95.1 %, RAM 96.6 %.

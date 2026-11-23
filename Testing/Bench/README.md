@@ -26,12 +26,15 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
 | Switch node, 3 A | Hard edge 7.9 ns (3.1 V/ns), overshoot +0.9 V on 30 V; soft edge 38 ns (current-driven). Scope-limited: real edges are faster |
 | Switch node, phase sinking 3 A | Low-side turn-on is the hard edge: 7.3 ns, **undershoot −9.5 V below ground** (−7.8 V at 1 A), ringing ~80–100 MHz for ~80 ns; soft edge mirrors the sourcing case |
 | Shunt-side pins at the low-side hard edge (3 A) | −4.6 / +3.1 V across the shunt at the default gate current (rating ±3 V transient); −2.4 / +1.7 V at 440/880 mA. All other edges within ±1.8 V |
+| Phases B and C, bus 12 / 24 V (3 A, 440/880 mA gate current) | B like A. **Phase C rings twice as hard** (+3.0 V overshoot, −4.5 V undershoot). Undershoot is the same −2.7 V on phase A at 12, 24 and 30 V |
+| Motor flux constant (back-EMF while coasting) | 1.396 mV·s ± 0.5 % (KV 282), within 0.5 % of the value the firmware uses |
+| Bridge voltage error | ≈ 85 mV per phase at 1 A, ≈ 140 mV above 2 A; explains the observer's 3 % flux excess. Output-side compensation linearises holds but adds ripple at speed |
 | Dead-time | 189–213 ns at the switch node (the MCU's 200 ns); body-diode plateau −1.0 V. Voltage error ≈ 0.3 V at 30 V |
 | Gate-drive strength (DRV8323 IDRIVE) | High-side edge, 1000 → 440 → 190 mA: rise 7.8 → 15.9 → 25.5 ns, overshoot 0.97 → 0.61 → 0.11 V. **Low-side edge: undershoot 9.5 → 2.1 → 0.2 V** for 7.1 → 8.9 → 18.4 ns |
 | Bus ripple | Static hold: ~20 mV p-p between edges, ±0.45 V / 20 ns spikes at hard edges. Under real load (21 W at 3000 rpm): 79 mV p-p |
 | Idle / overhead power | MCU + regulators 0.39 W, gate driver awake +0.36 W, switching at zero current +0.81 W |
 | No-load input power | 6.1 W at 1000 rpm, 13.3 W at 2000 rpm, 21.1 W at 3000 rpm (sensorless closed loop) |
-| Firmware over-current trip | Outputs off ~19 µs after the ADC sample that sees it; worst case ≈ 60 µs → overload protection only |
+| Firmware over-current trip | Outputs off 9.5 µs after the ADC sample that sees it (4 of 4 trips); worst case ≈ 50 µs → overload protection only |
 | Current-sense scale | Floating DMM across the shunt: board reading correct within 1–2 % (3 A and 5 A) |
 | Current-sense offsets / noise | Offsets move < 0.4 mV from 12 to 30 V, repeat within 1.1 mV; 20–27 mA rms per sample whether switching or not |
 | Motor winding (4-wire, motor unplugged) | 17.65 / 18.19 / 18.08 mΩ per phase, mean 17.97 mΩ; the bench supply's leads alone add 110–145 mΩ |
@@ -43,13 +46,14 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
 
 ## What the firmware has to design around (provisional envelope)
 
-- **Short-circuit protection is the gate driver's VDS monitor, not the firmware.** The firmware trip needs up to ~60 µs; a
+- **Short-circuit protection is the gate driver's VDS monitor, not the firmware.** The firmware trip needs up to ~50 µs; a
   phase-to-phase fault at 56 V through ~19 µH rises ~3 A/µs. The driver's trip point still has to be verified on the bench.
 - **Current sensing at high duty:** the firmware now rebuilds the phase with the shortest low-side window from the other two
   (verified: phase C correct at 95 % duty, where it read half before). The highest phase must still stay ≤ ~95 %.
 - **Switch-node undershoot:** −8 to −10 V below ground for ~10 ns at every low-side hard turn-on (phase sinking current), at
   30 V / 3 A with the default gate current (2.7 V at 440/880 mA, none at 190/380 mA). **The driver's absolute maximum on
   the switch-node pin is −7 V for 200 ns**, so the default gate current puts this board outside the rating — and likewise on the shunt-side pins (−4.6 V measured, ±3 V rated).
+- **Phase C is the limiting leg** for switch-node stress (about twice the ringing of A and B): take margins there.
 - **Dead-time voltage error ≈ 1 % of the bus** (0.3 V at 30 V) for |I| ≳ 1 A, current-dependent below. It limits low-speed
   torque linearity and blocks high-frequency-injection sensing on this low-inductance motor; compensation or a shorter
   (verified) dead-time is needed.
@@ -81,8 +85,9 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
 
 1. Dead-time / voltage-error compensation (150–190 mV measured), then re-tune the current loop for a 25–30 mΩ loop resistance.
    B vs C raw-reading mismatch of 70–170 mA at 80–90 % duty (scope on SOB / SOC).
-2. Phases B and C, 12 V / 24 V points; undershoot at the driver IC's own pins and at higher current / bus voltage.
-3. Back-EMF capture while coasting (motor flux constant independent of the current sense).
+2. Undershoot at the driver IC's own pins (needs soldered leads: the only access is a 0.5 mm test point next to the gate
+   test points) and at higher current / bus voltage, measured on phase C.
+3. Voltage-error compensation driven from the current reference instead of the measured current.
 4. Gate driver over-current trip point and latency; 10 A thermal hold; regeneration step; shorter dead-time (all supervised).
 5. Not possible on this bench: efficiency under shaft load, bus-capacitor ripple at full power, high-side gate amplitude
    (needs a differential probe), EMC.

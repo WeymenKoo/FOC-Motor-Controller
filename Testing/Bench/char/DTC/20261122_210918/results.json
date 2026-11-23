@@ -1,0 +1,74 @@
+[
+ {
+  "dtc_v": 0.0,
+  "result": "CLOSED",
+  "fail": "NONE",
+  "ho_flux": "1.04035",
+  "sl_rpm": 999.8839,
+  "sl_flux": 1.0334,
+  "id": 0.009,
+  "iq": 0.4515,
+  "flux_sd": 0.0065,
+  "psu_w": 6.15
+ },
+ {
+  "dtc_v": 0.05,
+  "result": "CLOSED",
+  "fail": "NONE",
+  "ho_flux": "1.01694",
+  "sl_rpm": 1000.3246,
+  "sl_flux": 1.0091,
+  "id": -0.0813,
+  "iq": 0.4187,
+  "flux_sd": 0.0108,
+  "psu_w": 6.15
+ },
+ {
+  "dtc_v": 0.1,
+  "result": "CLOSED",
+  "fail": "NONE",
+  "ho_flux": "0.992538",
+  "sl_rpm": 999.7073,
+  "sl_flux": 0.9839,
+  "id": 0.0311,
+  "iq": 0.4362,
+  "flux_sd": 0.0194,
+  "psu_w": 6.15
+ },
+ {
+  "dtc_v": 0.15,
+  "result": "CLOSED",
+  "fail": "NONE",
+  "ho_flux": "0.976909",
+  "sl_rpm": 1000.2563,
+  "sl_flux": 0.9706,
+  "id": 0.0599,
+  "iq": 0.4293,
+  "flux_sd": 0.0277,
+  "psu_w": 6.12
+ },
+ {
+  "dtc_v": 0.2,
+  "result": "CLOSED",
+  "fail": "NONE",
+  "ho_flux": "0.982701",
+  "sl_rpm": 1001.0404,
+  "sl_flux": 0.9494,
+  "id": -0.0747,
+  "iq": 0.457,
+  "flux_sd": 0.0456,
+  "psu_w": 6.12
+ },
+ {
+  "dtc_v": 0.0,
+  "result": "CLOSED",
+  "fail": "NONE",
+  "ho_flux": "1.03944",
+  "sl_rpm": 999.8092,
+  "sl_flux": 1.0331,
+  "id": -0.0643,
+  "iq": 0.4557,
+  "flux_sd": 0.0058,
+  "psu_w": 6.09
+ }
+]
