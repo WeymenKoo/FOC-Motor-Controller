@@ -38,6 +38,7 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
 | Bus ripple | Static hold: ~20 mV p-p between edges, ±0.45 V / 20 ns spikes at hard edges. Under real load (21 W at 3000 rpm): 79 mV p-p |
 | Idle / overhead power | MCU + regulators 0.39 W, gate driver awake +0.36 W, switching at zero current +0.81 W |
 | No-load input power | 6.1 W at 1000 rpm, 13.3 W at 2000 rpm, 21.1 W at 3000 rpm (sensorless closed loop) |
+| Gate driver short-circuit trip (VDS monitor) | Works: trips at 22–23 A at the 0.06 V setting, outputs off through the fault pin. Default setting 0.75 V would be ~280 A |
 | Firmware over-current trip | Outputs off 9.5 µs after the ADC sample that sees it (4 of 4 trips); worst case ≈ 50 µs → overload protection only |
 | Current-sense scale | Floating DMM across the shunt: board reading correct within 1–2 % (3 A and 5 A) |
 | Current-sense offsets / noise | Offsets move < 0.4 mV from 12 to 30 V, repeat within 1.1 mV; 20–27 mA rms per sample whether switching or not |
@@ -50,8 +51,9 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
 
 ## What the firmware has to design around (provisional envelope)
 
-- **Short-circuit protection is the gate driver's VDS monitor, not the firmware.** The firmware trip needs up to ~50 µs; a
-  phase-to-phase fault at 56 V through ~19 µH rises ~3 A/µs. The driver's trip point still has to be verified on the bench.
+- **Short-circuit protection is the gate driver's VDS monitor, and at the board's present setting (0.75 V ≈ 280 A) it is
+  effectively off.** Measured: the 0.06 V setting trips at 22–23 A (3 of 3), i.e. threshold / 2.7 mΩ cold. Use 0.13 V
+  (≈ 48 A cold, ≈ 30 A hot). The firmware trip needs up to ~50 µs and cannot see more than ~22 A (current-sense range).
 - **Current sensing at high duty:** the firmware now rebuilds the phase with the shortest low-side window from the other two
   (verified: phase C correct at 95 % duty, where it read half before). The highest phase must still stay ≤ ~95 %.
 - **Switch-node undershoot:** −8 to −10 V below ground for ~10 ns at every low-side hard turn-on (phase sinking current), at
@@ -94,6 +96,6 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
 2. Undershoot at the driver IC's own pins (needs soldered leads: the only access is a 0.5 mm test point next to the gate
    test points) and at higher current / bus voltage, measured on phase C.
 3. Voltage-error compensation driven from the current reference instead of the measured current.
-4. Gate driver over-current trip point and latency; 10 A thermal hold; regeneration step; shorter dead-time (all supervised).
+4. Gate driver trip reaction time; 10 A thermal hold; regeneration step; shorter dead-time (all supervised).
 5. Not possible on this bench: efficiency under shaft load, bus-capacitor ripple at full power, high-side gate amplitude
    (needs a differential probe), EMC.

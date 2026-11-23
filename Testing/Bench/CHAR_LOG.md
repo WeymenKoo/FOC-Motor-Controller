@@ -557,3 +557,29 @@ Same placement throughout (CH1 H3 / R32-GND, one hold of the probe). Input power
   coupling to leg C's own loop. The envelope keeps the larger value. A soldered coax pigtail at H3 would settle it.
 - B9's "sense trace 1.5 V worse than the pad at 30 V" (−4.18 V vs −2.66 to −3.04 V on phase A) is larger than phase A's
   placement spread, so it is probably real, but it rests on a single TP38 capture.
+
+## F2 — gate driver VDS over-current trip (short-circuit protection) · `char/F2/20261122_214445`
+DRV8323 VDS_LVL code 0 (0.06 V, the lowest), latched mode, IDRIVE 7, 30 V. PWM_TEST: pre-align 50.8/50/50, then a duty step
+ramping phase A at ~45–70 A/ms; the firmware trip (`p_i_peak`) is the ceiling of each pulse. CH1 H1, CH2 SOA (60 mV/A).
+Currents are the SOA plateaus in the low-side windows (the last one sampled before the trip).
+| Firmware ceiling | Duty step | What tripped | Last plateau before the trip |
+|---|---|---|---|
+| 10 A | 3.0 % | firmware (OVERCURRENT) | 10.4 A |
+| 15 A | 4.1 % | firmware | 14.8 A |
+| 20 A | 5.1 % | firmware | 20.8 A |
+| 22 A | 5.5 % | **gate driver (DRV_NFAULT, outputs off by the nFAULT path)** | 21.75 A |
+| 22 A (repeat) | 5.5 % | gate driver | 21.83 A |
+| 22 A (repeat) | 5.5 % | gate driver | 21.45 A |
+- **The driver's VDS protection works and trips at ≈ 22–23 A at the 0.06 V setting, 3 of 3** (current rising ~1.8 A per PWM
+  period at that point; the trip falls in the high-side window after the last plateau). 0.06 V / 22.5 A = 2.7 mΩ: the FET's
+  on-resistance (datasheet 2.6 typ / 3.0 max) — so the threshold scales as V_DS / 2.7 mΩ **cold**.
+- **Scaling to the other settings (cold FET): 0.13 V → ~48 A, 0.20 V → ~75 A, and the board's present default 0.75 V → ~280 A.**
+  With the default the board has no usable short-circuit protection. Hot (R_DS(on) × ~1.6 at 125 °C) every figure drops by that factor.
+- **Recommendation:** VDS_LVL code 1 (0.13 V): ~48 A cold / ~30 A hot — above the 14 A peak of the 10 A rms design point with
+  margin for a hot FET, far below anything the FETs or shunts cannot take for the driver's microsecond response. Code 0 for
+  bench work at ≤ 10 A. The setting is a saved parameter (`p_drv_vds_lvl`, 9 in flash): changing the stored value needs a SAVE.
+- Firmware trip overshoot at these ramp rates: the plateau at the trip is within ~1 A of the ceiling in every case. (The
+  "peak" column printed by the script, 13.7–26 A, picked up the SOA edge spikes and is not used.)
+- Not resolved: the driver's reaction time (record at 2 µs per point; datasheet deglitch 4 µs + gate turn-off). The hard firmware
+  ceiling is 22.2 A (95 % of the CSA's linear range), so currents above ~23 A cannot be measured or protected by firmware on Rev 1.
+- No damage: every trip cleared with DISARM + CLEAR_FAULT, and the next pulse ran normally.
