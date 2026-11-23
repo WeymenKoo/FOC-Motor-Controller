@@ -505,3 +505,22 @@ rating; B8 showed the undershoot does not depend on the bus voltage). CH1 TP38 (
   rings about 1.8 V harder at the pad (B7), so its sense trace may sit near −6 V: **little margin left at IDRIVE 11, at only 3 A.**
 - IDRIVE 7 is clean at both points and both voltages. **Recommendation changed: IDRIVE 7 (190 / 380 mA) as the default**, 11 as
   the upper limit; hard-edge loss rises from ~0.4 to ~0.8 µJ per edge (≈ +20 mW per phase at 25 kHz), negligible.
+
+## B10 — phase C hard edges vs current, 30 V · `char/B10/20261122_212919`
+CH1 H3 / R32-GND. Low-side turn-on with C sinking, high-side turn-on with C sourcing. (A first pass, `…_212737`, captured
+nothing — no probe contact — and ran all steps without the guard having data; the script now checks the probe at zero current
+and stops on a missed capture.)
+| IDRIVE | Current | Low-side turn-on: t10–90 / minimum | High-side turn-on: t10–90 / peak |
+|---|---|---|---|
+| 7 | 3 A | 17.7 ns / −3.54 V | 25.5 ns / 31.4 V (+2.1 V) |
+| 7 | 5 A | 17.3 ns / −3.51 V | 25.1 ns / 31.3 V (+2.1 V) |
+| 11 | 3 A | 8.8 ns / −4.73 V | 16.5 ns / 32.4 V (+3.1 V) |
+| 11 | 4 A | 8.6 ns / −4.85 V | 16.7 ns / 32.3 V (+3.1 V) |
+| 11 | 5 A | 8.1 ns / −4.95 V | 17.3 ns / 32.3 V (+3.1 V) |
+- **Current dependence is weak: about −0.1 V per amp at IDRIVE 11, none measurable at IDRIVE 7.** The ringing is set by the edge
+  (gate-drive rate and the leg's loop inductance), not by the load current. A straight-line extrapolation to 10 A gives about
+  −5.5 V at the pad for IDRIVE 11 — inside −7 V only if the sense trace adds nothing, and B9 says it adds ~1.5 V on phase A.
+- **Phase C still undershoots −3.5 V at IDRIVE 7**, where phase A is clean (−0.8 V): the slower gate drive halves the problem
+  on this leg but does not remove it. Its source is the layout of leg C.
+- Envelope: IDRIVE 7 keeps the worst leg at ≈ −3.5 V (pad) up to 5 A with no trend in current; IDRIVE 11 is not recommended.
+  Below 7 (codes 4–6: 60–120 mA source) is the next thing to try if more margin is wanted. Rev B: fix leg C's loop.
