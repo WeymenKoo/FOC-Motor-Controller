@@ -361,3 +361,19 @@ Flashed 2026-11-22 (parameter page untouched). UART + PSU only, 30 V.
 - **No meaningful difference at 1000 rpm**: R × i is ~20 mV against ~2 V of back-EMF. The 3–5 % flux excess is therefore not
   a resistance effect (candidates: the flux constant itself, the voltage-error model). The earlier "id ≈ 0.9 A at speed" was
   seen at higher speed and is not reproduced here; it needs a 3000 rpm run to revisit.
+
+## BEMF — back-EMF while coasting · `char/BEMF/20261122_205105` (`analysis.json`)
+Sensorless to 1000 rpm, STOP (outputs off), capture ~50 ms later, 20 ms record. CH1 H1 (A), CH2 H2 (B), ground at the shunts.
+Line-line = A − B, sine fit on each half of the record (the speed falls ~28 rpm in 10 ms).
+| Run | Speed in the record (from the frequency) | Line-line peak | λ first / second half |
+|---|---|---|---|
+| 0 | 872 → 843 rpm | 3.04 V | 1.402 / 1.398 mV·s |
+| 1 | 840 → 812 rpm | 2.91 V | 1.396 / 1.388 mV·s |
+| 2 | 900 → 869 rpm | 3.14 V | 1.397 / 1.396 mV·s |
+- **Flux constant λ = 1.396 mV·s ± 0.5 % between runs** (probe / scope gain ±2 %): KV 282, Kt 0.0293 N·m/A. The stored value
+  (1.389, from the September I/f recordings) is 0.5 % lower — **confirmed independently of the current sense and the observer.**
+- So the observer's 3–5 % flux excess is not the flux constant and not the resistance (FW check). What is left is the voltage
+  it assumes: a 150–190 mV error on ~2 V of back-EMF at 1000 rpm is the right size (→ dead-time compensation).
+- With the outputs off the phases float up to the bus: the highest phase sits at +30.5 V (bus + a high-side body-diode
+  drop at leakage current), the others below it by the line-line back-EMF (minimum 26.8 V). No current flows; nothing is stressed.
+- Coast-down: ~2900 rpm/s at ~860 rpm → ~24 mN·m of drag with J ≈ 8e-5 kg·m² (estimate), i.e. ~2.1 W of friction + iron loss.
