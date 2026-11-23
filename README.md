@@ -6,7 +6,7 @@ A single-axis, sensored field-oriented-control (FOC) motor controller for one jo
   <img src="Documentation/images/photo_rev1_boards.jpg" width="640" alt="Two Rev 1 boards from the first JLCPCB run: assembled top side in front, bare bottom side held up behind">
 </p>
 
-**Status:** Rev 1 is design-frozen, fabricated, brought up and bench-characterized up to 30 V and 10 A (2026-11-22). What it can and cannot do is summarized just below; the full story, test by test, is the [test and bring-up report](Testing/README.md). Not yet tested on the 12S bus, under shaft load, or with the encoder.
+**Status:** Rev 1 is design-frozen, fabricated, brought up and bench-characterized up to 30 V and 10 A (2026-11-22). What it can and cannot do, test by test, is in the [test and bring-up report](Testing/README.md). Not yet tested on the 12S bus, under shaft load, or with the encoder.
 
 | | |
 |---|---|
@@ -84,47 +84,17 @@ Stackup: L1 signal + power, L2 ground, L3 / L4 signal + power, L5 ground (identi
 
 Plots of every copper, mask, paste and silkscreen layer are in [`Hardware/Project Outputs/PCB Layers PDF/`](Hardware/Project%20Outputs/PCB%20Layers%20PDF/). The full board drawing is [`FoC_Motor_Controller_PCB_Artwork.pdf`](Documentation/FoC_Motor_Controller_PCB_Artwork.pdf).
 
-## Simulation vs scope
+## Testing
 
-Three LTspice decks built from the Rev 1 netlist, each predicting what a bench measurement on a Rigol DHO804 should show, then checked against the scope captures. Full slides: [`FOC_Motor_Controller_Sim_and_Bench_Results.pdf`](Documentation/FOC_Motor_Controller_Sim_and_Bench_Results.pdf). Decks, raw captures and scripts: [`Testing/Simulation/`](Testing/Simulation/).
+Brought up and characterized on the bench up to 30 V and 10 A: switching, current sense, protection, braking and
+sensorless closed-loop speed to 3000 rpm, with three LTspice decks checked against scope captures.
 
-| | Simulation | Bench vs simulation |
-|---|---|---|
-| **1 · Hot-plug** (XT60 into a live supply) | <img src="Documentation/images/slide_04_hotplug_sim.jpg" width="420"> | <img src="Documentation/images/slide_05_hotplug_bench_vs_sim.jpg" width="420"> |
-| **2 · Half-bridge switching** (one leg, hard edges) | <img src="Documentation/images/slide_08_halfbridge_sim.jpg" width="420"> | <img src="Documentation/images/slide_09_halfbridge_bench_vs_sim.jpg" width="420"> |
-| **3 · Current sense** (standstill hold, I/f spin) | <img src="Documentation/images/slide_11_csa_sim.jpg" width="420"> | <img src="Documentation/images/slide_12_csa_bench_vs_sim.jpg" width="420"> |
-
-Bench results (12 V supply; hot-plug at 30 V):
-
-- **Hot-plug:** 30.15 V peak, no overshoot. The bench supply limits the charge rate, so the 36.3 V overshoot the ideal-source sim predicts doesn't occur on this supply.
-- **Switching:** 8.8 ns rise and 13.87 V peak at 12 V, against 7.0 ns in the sim. The difference is mostly the 70 MHz probe.
-- **Current sense:** the I/f spin at 2 A / 300 rpm gives a 2.04 A envelope, and the 112 mV pulse matches the sim's 120 mV.
-
-## What this board can and cannot do
-
-From the [test and bring-up report](Testing/README.md), which walks through every test: why it was done, what was found, and what changed because of it.
+**[Test and bring-up report →](Testing/README.md)**: every test in order, what it found, what it changed in firmware,
+and the Rev B list that came out of it.
 
 <p align="center">
   <img src="Testing/Bench/report/fig1_gate_drive_undershoot.png" width="80%" alt="Switch-node undershoot at low-side turn-on for three gate-drive settings, against the gate driver's -7 V rating">
 </p>
-
-**It can**
-
-- Switch 30 V cleanly up to 10 A per phase, once the gate drive is slowed from the driver's default.
-- Measure phase current within 1–2 %, with about 25 mA of noise per sample, up to roughly 95 % duty.
-- Run a motor without an encoder: closed-loop speed to 3000 rpm, 50 starts out of 50, and position hold with a current vector.
-- Protect itself from overload in firmware within about 50 µs, and from a short circuit through the gate driver (trip measured at 22–23 A at its lowest setting).
-- Survive a supply sag to 5 V, a lost control link, and regenerative braking, without latching up or over-volting the bus.
-
-**It cannot**
-
-- Run at the gate driver's power-on settings: they put −10 V on a pin rated for −7 V and leave the short-circuit trip at about 280 A. The firmware overrides both.
-- Absorb braking energy. One stop of the bare rotor raises a 12 V bus by 11 V, so firmware refuses to brake above a voltage limit.
-- Read all three phase currents above about 95 % duty.
-- Be stopped by a hardware E-stop; on Rev 1 that is the supply's switch.
-- Sense rotor position at standstill under load without the encoder.
-
-**Not yet known:** anything above 30 V or 10 A (including the 56 V design point), FET temperature at 10 A, efficiency under load, EMC.
 
 ## Bench GUI: FOCLINK
 
@@ -163,13 +133,14 @@ Screenshots are from the GUI's built-in board simulator (`python -m focgui --sim
 |---|---|
 | [`FoC_Motor_Controller_Schematic.pdf`](Documentation/FoC_Motor_Controller_Schematic.pdf) | Full schematic, 12 hierarchical sheets |
 | [`FoC_Motor_Controller_PCB_Artwork.pdf`](Documentation/FoC_Motor_Controller_PCB_Artwork.pdf) | Board drawing |
-| [`FOC_Motor_Controller_Sim_and_Bench_Results.pdf`](Documentation/FOC_Motor_Controller_Sim_and_Bench_Results.pdf) | Simulation and bench-correlation slides |
+| [`DESIGN.md`](Documentation/DESIGN.md) | Design decisions and why: requirements, revision history, part choices |
+| [`Testing/README.md`](Testing/README.md) | Test and bring-up report |
 
 ## Repository layout
 
 | Path | Contents |
 |---|---|
-| `Documentation/*.pdf` | Schematic, PCB artwork, sim-vs-bench results (above) |
+| `Documentation/` | Schematic and PCB artwork PDFs, design decisions, images |
 | `Hardware/FoC Motor Controller.kicad_pro` / `.kicad_sch` / `.kicad_pcb` | KiCad 10 project, root sheet and board |
 | `Hardware/Schematics/` | Hierarchical sheets: power input and generation, MCU, gate driver, MOSFETs, sensing, CAN-FD, interconnects, position, LEDs |
 | `Hardware/Libraries/` | Project-local symbols, footprints and 3D models (`${KIPRJMOD}/Libraries/`) |
@@ -177,16 +148,5 @@ Screenshots are from the GUI's built-in board simulator (`python -m focgui --sim
 | `Testing/README.md` | **The test and bring-up report**: every test in order, why, what was found, what changed |
 | `Testing/Bench/` | Lab notebook, raw captures, report figures, probe map |
 | `Hardware/Project Outputs/` | BOM, pick-and-place, netlist, Rev 1 fabrication package, per-layer PDFs |
-| `Documentation/images/` | Board photo, renders, layer views, sim-vs-bench figures, GUI screenshots |
 
 Open `Hardware/FoC Motor Controller.kicad_pro` in KiCad 10. Vendor datasheets and the KiCad worksheet templates are not included; without the templates KiCad falls back to its default title block.
-
-## Rev 2, top items
-
-1. Thermal vias in the low-side drain pads, or a bottom-side switch-node pour
-2. Board NTC moved into the FET zone
-3. Separate analog 3.3 V rail (ferrite + local caps) for VDDA / VREF+
-4. More bulk capacitance, or a lower-ESR part
-5. Hardware CAN node addressing
-
-Measured inputs for the next revision (braking energy path, ADC input mapping, leg C's commutation loop, shunt layout, probe points) are in the [test and bring-up report](Testing/README.md#part-5-what-changed-because-of-all-this).
