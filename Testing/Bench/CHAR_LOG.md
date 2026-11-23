@@ -277,8 +277,10 @@ SL_POSITION hold rotated 180° electrical (REF POS 0.0357 turns): ia = −I, ib 
   −8 to −10 V, nearly independent of load current (edge-driven: node-capacitance charging / diode recovery current through
   the inductance of the low-side source path = shunt + its ground connection). Measured to the shunt's ground end; 70 MHz
   scope, so the true peak is larger.
-- **To check against the DRV8323 datasheet:** negative transient limits of SHx and of the sense inputs SPx/SNx, at this
-  amplitude and ~10 ns duration, and how it scales to 10 A / 56 V. Explains the ~100 ns disturbance on SOx after each edge.
+- **DRV8323 absolute maximum (datasheet p. 11): SHx −7 V for a 200 ns transient (−5 V continuous); SPx/SNx/SLx −3 V
+  transient.** The −9.5 to −10 V measured at IDRIVE 15 is **beyond the SHx rating** (measured at the H1 pad against the
+  shunt's ground end, not at the IC pin, with a 70 MHz scope). IDRIVE 11 (−2.7 V) and 7 (−0.8 V) are inside it. The shunt-side
+  pins were not measured. Explains the ~100 ns disturbance on SOx after each edge.
 - The first capture (5 V/div) clipped at −6.85 V and showed a false "22 MHz ±5 V" ringing — scope input overdrive, discarded.
 - Next: repeat at IDRIVE 11 and 7 on this polarity (a slower edge should shrink the undershoot far more than it did the
   +0.9 V overshoot). Rev B: lower-inductance shunt placement / Kelvin source return, RC snubber or gate resistor on the low side.

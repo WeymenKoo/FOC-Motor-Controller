@@ -46,8 +46,8 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
   phase-to-phase fault at 56 V through ~19 µH rises ~3 A/µs. The driver's trip point still has to be verified on the bench.
 - **Current sensing at high duty:** reconstruct phase C as −(ia + ib), or keep its low-side window ≥ 3 µs (duty ≤ ~92 %).
 - **Switch-node undershoot:** −8 to −10 V below ground for ~10 ns at every low-side hard turn-on (phase sinking current), at
-  30 V / 3 A with the default gate current (2.7 V at 440/880 mA, none at 190/380 mA). Check against the gate driver's
-  negative-transient ratings before raising current or bus voltage.
+  30 V / 3 A with the default gate current (2.7 V at 440/880 mA, none at 190/380 mA). **The driver's absolute maximum on
+  the switch-node pin is −7 V for 200 ns**, so the default gate current puts this board outside the rating.
 - **Dead-time voltage error ≈ 1 % of the bus** (0.3 V at 30 V) for |I| ≳ 1 A, current-dependent below. It limits low-speed
   torque linearity and blocks high-frequency-injection sensing on this low-inductance motor; compensation or a shorter
   (verified) dead-time is needed.
@@ -78,7 +78,7 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
 ## Open items
 
 1. **Re-identify the loop resistance in firmware** (winding 18 mΩ + bridge path) and update the current-loop / observer constants.
-2. Opposite-polarity hard edge, phases B and C, 12 V / 24 V points.
+2. Phases B and C, 12 V / 24 V points; shunt-side pins (SPx / SNx, rated −3 V transient) during the low-side hard edge.
 3. Back-EMF capture while coasting (motor flux constant independent of the current sense).
 4. Gate driver over-current trip point and latency; 10 A thermal hold; regeneration step; shorter dead-time (all supervised).
 5. Not possible on this bench: efficiency under shaft load, bus-capacitor ripple at full power, high-side gate amplitude
