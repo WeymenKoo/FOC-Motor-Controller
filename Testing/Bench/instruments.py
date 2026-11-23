@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""instruments.py -- bench instruments for the characterization (CHARACTERIZATION_PLAN.md).
+"""instruments.py -- bench instruments for the characterization.
 
 Psu   : Korad KA3005P over its USB virtual COM (9600 8N1, commands without terminator, ~50 ms between commands).
 Scope : Rigol DHO804 over USB-TMC (pyvisa, '@py' backend: pyvisa-py + pyusb + libusb-package).
