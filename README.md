@@ -6,7 +6,7 @@ A single-axis, sensored field-oriented-control (FOC) motor controller for one jo
   <img src="Documentation/images/photo_rev1_boards.jpg" width="640" alt="Two Rev 1 boards from the first JLCPCB run: assembled top side in front, bare bottom side held up behind">
 </p>
 
-**Status:** Rev 1 is design-frozen, fabricated and bench-characterized up to 30 V and 10 A (2026-11-22). Switch-node behaviour, gate-drive and protection settings, current-sense accuracy, dead-time, regeneration and thermal rise are measured; the result is a firmware operating envelope and a list of Rev B design inputs in the [characterization report](Testing/Bench/README.md). Not yet tested on the 12S bus, under shaft load, or with the encoder.
+**Status:** Rev 1 is design-frozen, fabricated, brought up and bench-characterized up to 30 V and 10 A (2026-11-22). What it can and cannot do is summarized just below; the full story, test by test, is the [test and bring-up report](Testing/README.md). Not yet tested on the 12S bus, under shaft load, or with the encoder.
 
 | | |
 |---|---|
@@ -100,19 +100,31 @@ Bench results (12 V supply; hot-plug at 30 V):
 - **Switching:** 8.8 ns rise and 13.87 V peak at 12 V, against 7.0 ns in the sim. The difference is mostly the 70 MHz probe.
 - **Current sense:** the I/f spin at 2 A / 300 rpm gives a 2.04 A envelope, and the 112 mV pulse matches the sim's 120 mV.
 
-## Power-stage characterization
+## What this board can and cannot do
 
-Rev 1 was characterized on the bench without an encoder or a mechanical load, using the motor as an inductive load and as a source of kinetic energy. Full report: [`Testing/Bench/README.md`](Testing/Bench/README.md).
+From the [test and bring-up report](Testing/README.md), which walks through every test: why it was done, what was found, and what changed because of it.
 
 <p align="center">
   <img src="Testing/Bench/report/fig1_gate_drive_undershoot.png" width="80%" alt="Switch-node undershoot at low-side turn-on for three gate-drive settings, against the gate driver's -7 V rating">
 </p>
 
-- **Gate drive:** the driver's power-on gate current undershoots the switch node to −10 V (rating −7 V); 190 / 380 mA is clean to 10 A.
-- **Short-circuit protection:** the driver's power-on threshold corresponds to about 280 A. The trip works (22–23 A at 0.06 V); 0.13 V is now set.
-- **Regeneration:** one stop of the bare rotor raises a 12 V bus by 11 V. A firmware voltage clamp holds it; Rev 2 needs a hardware path.
-- **Current sensing:** accurate within 1–2 %; phase C is sampled late in the ADC sequence and is reconstructed at high duty.
-- **Dead-time:** set by the gate driver, not the MCU. Bridge voltage error 0.16–0.23 V.
+**It can**
+
+- Switch 30 V cleanly up to 10 A per phase, once the gate drive is slowed from the driver's default.
+- Measure phase current within 1–2 %, with about 25 mA of noise per sample, up to roughly 95 % duty.
+- Run a motor without an encoder: closed-loop speed to 3000 rpm, 50 starts out of 50, and position hold with a current vector.
+- Protect itself from overload in firmware within about 50 µs, and from a short circuit through the gate driver (trip measured at 22–23 A at its lowest setting).
+- Survive a supply sag to 5 V, a lost control link, and regenerative braking, without latching up or over-volting the bus.
+
+**It cannot**
+
+- Run at the gate driver's power-on settings: they put −10 V on a pin rated for −7 V and leave the short-circuit trip at about 280 A. The firmware overrides both.
+- Absorb braking energy. One stop of the bare rotor raises a 12 V bus by 11 V, so firmware refuses to brake above a voltage limit.
+- Read all three phase currents above about 95 % duty.
+- Be stopped by a hardware E-stop; on Rev 1 that is the supply's switch.
+- Sense rotor position at standstill under load without the encoder.
+
+**Not yet known:** anything above 30 V or 10 A (including the 56 V design point), FET temperature at 10 A, efficiency under load, EMC.
 
 ## Bench GUI: FOCLINK
 
@@ -166,7 +178,8 @@ Screenshots are from the GUI's built-in board simulator (`python -m focgui --sim
 | `Hardware/Schematics/` | Hierarchical sheets: power input and generation, MCU, gate driver, MOSFETs, sensing, CAN-FD, interconnects, position, LEDs |
 | `Hardware/Libraries/` | Project-local symbols, footprints and 3D models (`${KIPRJMOD}/Libraries/`) |
 | `Testing/Simulation/` | LTspice bench-correlation suite with DHO804 captures; see [`Testing/Simulation/README.md`](Testing/Simulation/README.md) |
-| `Testing/Bench/` | Power-stage characterization report, test log, raw captures, probe map; see [`Testing/Bench/README.md`](Testing/Bench/README.md) |
+| `Testing/README.md` | **The test and bring-up report**: every test in order, why, what was found, what changed |
+| `Testing/Bench/` | Lab notebook, raw captures, report figures, probe map |
 | `Hardware/Project Outputs/` | BOM, pick-and-place, netlist, Rev 1 fabrication package, per-layer PDFs |
 | `Documentation/` | Design notes, design rationale (DDR-001), layout and manufacturing review, portfolio deck, images |
 
@@ -180,4 +193,4 @@ Open `Hardware/FoC Motor Controller.kicad_pro` in KiCad 10. Vendor datasheets an
 4. More bulk capacitance, or a lower-ESR part
 5. Hardware CAN node addressing
 
-The full list, with reasons, is in [Design Notes §16](Documentation/Design_Notes.md#16-rev-2-list). Measured inputs for the next revision (braking energy path, ADC input mapping, leg C's commutation loop, shunt layout, probe points) are in the [characterization report](Testing/Bench/README.md#4-rev-b-design-inputs).
+The full list, with reasons, is in [Design Notes §16](Documentation/Design_Notes.md#16-rev-2-list). Measured inputs for the next revision (braking energy path, ADC input mapping, leg C's commutation loop, shunt layout, probe points) are in the [test and bring-up report](Testing/README.md#part-5-what-changed-because-of-all-this).
