@@ -14,8 +14,8 @@ K-type thermocouple. Work in progress — this page is updated as tests are adde
 | `instruments.py`, `analyze_edges.py` | Scope / PSU control and the edge-metric extraction used for the tables |
 
 **Status of the numbers:** voltages, timings, temperatures and currents are measured. The current-sense scale was
-cross-checked with a floating DMM across the phase A shunt (A5c): correct within 1–2 %. One consequence: the motor's phase
-resistance is ~40–60 mΩ (datasheet 39 mΩ), not the 98 mΩ identified earlier — to be pinned with a direct 4-wire measurement.
+cross-checked with a floating DMM across the phase A shunt (correct within 1–2 %), and the motor's winding resistance was
+measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datasheet's 39 mΩ) — not the 98 mΩ identified earlier.
 
 ## Results at a glance (30 V bus)
 
@@ -32,6 +32,7 @@ resistance is ~40–60 mΩ (datasheet 39 mΩ), not the 98 mΩ identified earlier
 | Firmware over-current trip | Outputs off ~19 µs after the ADC sample that sees it; worst case ≈ 60 µs → overload protection only |
 | Current-sense scale | Floating DMM across the shunt: board reading correct within 1–2 % (3 A and 5 A) |
 | Current-sense offsets / noise | Offsets move < 0.4 mV from 12 to 30 V, repeat within 1.1 mV; 20–27 mA rms per sample whether switching or not |
+| Motor winding (4-wire, motor unplugged) | 17.65 / 18.19 / 18.08 mΩ per phase, mean 17.97 mΩ; the bench supply's leads alone add 110–145 mΩ |
 | Three-shunt current sensing | Phase C is sampled 0.87–1.45 µs after the window centre (second in its ADC's sequence): valid only for low-side windows ≥ ~3 µs. Phases A/B valid to ~1.2 µs |
 | Stop paths | Heartbeat loss → outputs off at 501 ms (500 ms setting), every time; STOP / DISARM acknowledged in 11–44 ms over USB-serial |
 | Sensorless start-up | 50 / 50 starts to 1000 rpm; closed loop 2.449 ± 0.011 s after RUN |
@@ -52,8 +53,9 @@ resistance is ~40–60 mΩ (datasheet 39 mΩ), not the 98 mΩ identified earlier
   sink regenerated energy.
 - **Gate drive:** IDRIVE 440/880 mA is a reasonable default (one third less overshoot, lower EMI, small switching-loss cost) —
   to be confirmed at higher current.
-- **Motor constants:** the stored phase resistance (98 mΩ) is about twice the real value; identification at ≤ 1 A is biased by
-  the dead-time error. Re-identify at higher current or with dead-time compensation.
+- **Motor constants:** the stored phase resistance (98 mΩ) is ~5.5× the winding's 18 mΩ; identification at ≤ 1 A is biased by
+  the dead-time error. The loop sees winding + bridge path (~47 mΩ effective from an energy balance). Re-identify at several
+  amps or with dead-time compensation.
 - **Thermal:** 5 A continuous in one phase costs +10 °C on the FET case; extrapolated +23 °C at 10 A (two points — to be confirmed).
 
 ## Rev B candidates
@@ -70,7 +72,7 @@ resistance is ~40–60 mΩ (datasheet 39 mΩ), not the 98 mΩ identified earlier
 
 ## Open items
 
-1. **Motor phase resistance** — direct 4-wire measurement (the stored 98 mΩ is ~2× too high; it sets current-loop and observer constants).
+1. **Re-identify the loop resistance in firmware** (winding 18 mΩ + bridge path) and update the current-loop / observer constants.
 2. Opposite-polarity hard edge, phases B and C, 12 V / 24 V points.
 3. Back-EMF capture while coasting (motor flux constant independent of the current sense).
 4. Gate driver over-current trip point and latency; 10 A thermal hold; regeneration step; shorter dead-time (all supervised).

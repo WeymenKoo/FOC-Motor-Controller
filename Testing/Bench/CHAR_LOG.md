@@ -245,3 +245,20 @@ Flux estimate at hand-over 1.036 ± 0.005 (1.029–1.045).
 Constant-power input (regulators): current rises as the bus falls. Runs down to 5 V, restarts between 5 and 6 V (≈ 1 V hysteresis).
 VDDA holds 3.30 V down to 5 V. After recovery: `reset_cause` = power-on, parameters reloaded from flash, and the 12 V-era
 over-voltage limit faults the board again above 14 V — expected, no latch-up, no corrupted state.
+
+## Motor winding resistance, 4-wire · `char/MOTOR_R/motor_r.csv`
+Motor unplugged from the board. KA3005P in constant current (3 V compliance) through two motor pins; DMM (mV DC) directly on
+the same pins. Room temperature, motor slightly warm from earlier runs.
+| Pins | DMM @ 1.999 A | DMM @ 2.999 A | Line-line | PSU terminal reading (incl. its leads) |
+|---|---|---|---|---|
+| 1–2 | 71.7 mV | 107.4 mV | 35.84 mΩ | 180–182 mΩ |
+| 2–3 | 72.5 mV | 108.8 mV | 36.27 mΩ | 164–170 mΩ |
+| 1–3 | 71.4 mV | 107.2 mV | 35.73 mΩ | 145–149 mΩ |
+- **Phase resistances (wye): 17.65 / 18.19 / 18.08 mΩ, mean 17.97 mΩ**, balanced ±1.7 %, linear 2 → 3 A.
+- Datasheet "39 mΩ" is therefore a line-line figure (measured 35.9 mΩ). **Resolves the long-standing "98 mΩ vs 39 mΩ" item:**
+  the bench supply's leads and clips add 110–145 mΩ (they dominated the 2026-09-27 DC cross-check, 195 mΩ line-line), and the
+  firmware's ID_R (≤ 1 A, 12 V) reads high because the dead-time voltage error still varies with current in that range.
+- **Firmware: `p_phase_r` = 0.098 Ω is ~5.5× the winding resistance.** What the current loop sees is winding + bridge path
+  (FET, shunt, traces, connector): the A5 energy balance gives ~47 mΩ effective per phase, so ~29 mΩ of path/loss on top of
+  18 mΩ of copper. Re-identify with dead-time compensation or at several amps; current-loop Ki and the observer's R·i term
+  follow from it.
