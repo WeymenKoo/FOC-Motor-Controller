@@ -191,6 +191,8 @@ scope.
 | +3.3 V rail | At the scope's noise floor |
 | +5 V rail | About 100 mV of ripple at 120–160 kHz from its own converter at light load |
 
+![Supply rails while the motor spins](Bench/report/fig14_rails.png)
+
 **What we learned.** The board's readings can be used as instruments. One method lesson: millivolt measurements with
 the grounded scope were useless because of a ground loop; the floating DMM was the fix.
 
@@ -201,8 +203,15 @@ firmware thinks it is. It had never been looked at under current.
 
 **What we did.** Parked the rotor with 1 A and 3 A flowing *out* of phase A and captured both edges.
 
+![Switch node with phase A sourcing 3 A](Bench/report/fig10_switch_node_sourcing.png)
+
 **What we found.** A hard rising edge of 7.9 ns with only 0.9 V of overshoot on a 30 V bus; a soft falling edge of
 38 ns, driven by the load current charging about 5 nF of node capacitance; dead-time of 189–213 ns at the node.
+
+The bus itself is quiet. Between edges it moves by about 20 mV; each hard edge puts a spike of up to ±0.4 V on it for
+about 20 ns. With the motor spinning under real power the ripple is 58–79 mV peak to peak from 1000 to 3000 rpm.
+
+![Bus ripple over one PWM period](Bench/report/fig15_bus_ripple.png)
 
 **What we learned.** It looked healthy. That was half the picture.
 
@@ -242,6 +251,15 @@ slower gate settings. Also measured on the thin sense trace that carries the nod
 
 ![Undershoot against gate drive, bus voltage, current and phase](Bench/report/fig2_undershoot_dependencies.png)
 
+The same comparison as waveforms. Left: three bus voltages land on the same minimum. Right: phase C at 5, 7.5 and 10 A
+at the slow gate setting.
+
+![Low-side turn-on at three bus voltages and three currents](Bench/report/fig12_voltage_and_current.png)
+
+And the three phases at the medium gate setting, where phase C stands out:
+
+![Low-side turn-on on each phase](Bench/report/fig11_three_phases.png)
+
 **What we found.**
 
 - **Bus voltage does not matter:** −2.7 V at 12, 24 and 30 V.
@@ -267,6 +285,8 @@ and the firmware needs to know how short is too short.
 **What we found.** Phases A and B read correctly down to about 1.2 µs. Phase C failed first, at about 3 µs, reading half
 the true current at 95 % duty. The amplifier was fine. The cause is the ADC: phases A and B are each converted first on
 their converter, while phase C is second in a sequence, 0.9–1.5 µs later, after the window has closed.
+
+![Phase C sampling instant against its low-side window](Bench/report/fig13_phase_c_sampling.png)
 
 **What we learned.** A schematic-level choice of ADC pins cost 5 % of usable duty. The firmware now rebuilds whichever
 phase has the shortest window from the other two, and phase C reads −0.79 A against −0.80 A on phase B where it read
@@ -340,6 +360,10 @@ withdrawn whenever the bus passes 90 % of the over-voltage limit, set here to 30
 
 ![Peak bus voltage under braking](Bench/report/fig7_regeneration.png)
 
+The same stops against time, as the firmware reported them over the serial link:
+
+![Speed and bus voltage during braking](Bench/report/fig17_regen_time.png)
+
 **What we found.**
 
 - Up to about 1 A of braking, nothing happens: the board's own consumption uses the energy.
@@ -383,6 +407,8 @@ bridge was switching. Ran 50 sensorless starts.
 | STOP or DISARM command | Acted on within 11–44 ms, mostly USB-serial delay |
 | 50 starts | 50 successes |
 
+![Supply current against bus voltage during the brown-out sweep](Bench/report/fig16_brownout.png)
+
 **What we learned.** No latch-up and no corrupted state. One detail for system design: the board draws more current as
 the bus falls (27 mA at 12 V, 64 mA at 5 V), so a weak supply can stall on the way up.
 
@@ -396,6 +422,9 @@ sense that measured them.
 - **Resistance.** Measured four-wire with the motor unplugged, the winding is 17.97 mΩ per phase, which matches the
   datasheet's 39 mΩ line-to-line. The old 98 mΩ had two causes: the bench supply's own leads add 110–145 mΩ, and the
   firmware's identification runs at 1 A, where the bridge's voltage error from 4.8 looks like extra resistance.
+
+  ![Apparent resistance against hold current](Bench/report/fig18_apparent_resistance.png)
+
 - **Flux constant.** With the outputs switched off and the rotor coasting, the back-EMF gives 1.396 mV·s, within 0.5 %
   of the value in use.
 
