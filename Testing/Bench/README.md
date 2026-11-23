@@ -13,9 +13,9 @@ K-type thermocouple. Work in progress — this page is updated as tests are adde
 | `char/<test>/<timestamp>/` | Raw waveforms (`.npz`), scope screenshots, per-test JSON/CSV |
 | `instruments.py`, `analyze_edges.py` | Scope / PSU control and the edge-metric extraction used for the tables |
 
-**Repeatability caveat:** switch-node ringing amplitudes are hand-held ×10 probe readings and vary by ~2.5 V with probe
-placement (same operating point: −3.5 V in one run, −1.0 V in the next). Trends within one run hold; comparisons between
-phases or probe points are provisional, and the larger values are used for the envelope.
+**Repeatability:** switch-node ringing is read with a hand-held ×10 probe. On phase A five separate placements agree within
+±0.2 V. Phase C is consistently worse than A at 440/880 mA (5 of 5 placements) but reads two different values at
+190/380 mA depending on placement (−3.4 V or −0.9 V); the larger one is used for the envelope.
 
 **Status of the numbers:** voltages, timings, temperatures and currents are measured. The current-sense scale was
 cross-checked with a floating DMM across the phase A shunt (correct within 1–2 %), and the motor's winding resistance was

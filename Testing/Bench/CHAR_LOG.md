@@ -541,3 +541,19 @@ Same placement throughout (CH1 H3 / R32-GND, one hold of the probe). Input power
   spot on the pad. **Hand-held readings of the ringing are placement-dependent by ~2.5 V.** Trends inside one placement hold
   (IDRIVE sweeps, current sweeps); comparisons across placements — phase C vs A / B (B7), TP38 vs the pad at 30 V (B9) — are
   not established until repeated. The conservative (larger) values are kept for the envelope.
+
+## B11 — repeatability of the ringing readings: three fresh probe placements per phase · `char/B11/C_*`, `char/B11/A_*`
+3 A, 30 V; low-side turn-on minimum (phase sinking) and high-side turn-on peak (phase sourcing). All same-day placements listed.
+| Phase | IDRIVE 11: minimum | IDRIVE 11: peak | IDRIVE 7: minimum | IDRIVE 7: peak |
+|---|---|---|---|---|
+| A, placements 1–3 | −2.81 / −3.04 / −3.04 V | 29.8 / 29.7 / 29.8 V | −0.80 / −0.86 / −0.80 V | 29.5 / 29.4 / 29.4 V |
+| A, earlier (B4neg, B8) | −2.66 / −2.70 V | — | −0.76 V | — |
+| C, placements 1–3 | −4.56 / −5.15 / −4.63 V | 32.2 / 29.5 / 32.3 V | −3.34 / **−0.81** / −3.47 V | 31.1 / **29.5** / 31.3 V |
+| C, earlier (B7, B10, B10b) | −4.46 / −4.73 V | 32.4 / 32.4 V | −3.54 / **−1.01** V | 31.4 / **29.4** V |
+- **Phase A is repeatable to ±0.2 V** across five placements. The method is sound there.
+- **Phase C is worse than A at IDRIVE 11 in 5 of 5 placements** (−4.5 to −5.2 V against −2.7 to −3.0 V): that finding stands.
+- **Phase C is bimodal at IDRIVE 7 and on the overshoot side**: four placements show −3.4 V / +2 V overshoot, two show the
+  clean picture (−0.9 V, no overshoot). Not explained — a different spot on the large H3 pad, or the ground-spring loop
+  coupling to leg C's own loop. The envelope keeps the larger value. A soldered coax pigtail at H3 would settle it.
+- B9's "sense trace 1.5 V worse than the pad at 30 V" (−4.18 V vs −2.66 to −3.04 V on phase A) is larger than phase A's
+  placement spread, so it is probably real, but it rests on a single TP38 capture.
