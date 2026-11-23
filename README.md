@@ -6,7 +6,7 @@ A single-axis, sensored field-oriented-control (FOC) motor controller for one jo
   <img src="Documentation/images/photo_rev1_boards.jpg" width="640" alt="Two Rev 1 boards from the first JLCPCB run: assembled top side in front, bare bottom side held up behind">
 </p>
 
-**Status:** Rev 1 is design-frozen, fabricated and partly bench-validated on a 12 V supply. The MCU, gate driver (SPI), current sensing and PWM are verified, and a T-Motor MN601-S has been identified (R, L, back-EMF) and spun open-loop up to 1000 rpm. Not yet tested on the 12S bus, under load, or in closed-loop FOC.
+**Status:** Rev 1 is design-frozen, fabricated and bench-characterized up to 30 V and 10 A (2026-11-22). Switch-node behaviour, gate-drive and protection settings, current-sense accuracy, dead-time, regeneration and thermal rise are measured; the result is a firmware operating envelope and a list of Rev B design inputs in the [characterization report](Testing/Bench/README.md). Not yet tested on the 12S bus, under shaft load, or with the encoder.
 
 | | |
 |---|---|
@@ -82,11 +82,11 @@ Stackup: L1 signal + power, L2 ground, L3 / L4 signal + power, L5 ground (identi
 <img src="Documentation/images/layout_all_signal_layers.jpg" width="100%" alt="All four routing layers overlaid">
 </details>
 
-Plots of every copper, mask, paste and silkscreen layer are in [`Project Outputs/PCB Layers PDF/`](Project%20Outputs/PCB%20Layers%20PDF/). The full board drawing is [`FoC_Motor_Controller_PCB_Artwork.pdf`](Documentation/FoC_Motor_Controller_PCB_Artwork.pdf).
+Plots of every copper, mask, paste and silkscreen layer are in [`Hardware/Project Outputs/PCB Layers PDF/`](Hardware/Project%20Outputs/PCB%20Layers%20PDF/). The full board drawing is [`FoC_Motor_Controller_PCB_Artwork.pdf`](Documentation/FoC_Motor_Controller_PCB_Artwork.pdf).
 
 ## Simulation vs scope
 
-Three LTspice decks built from the Rev 1 netlist, each predicting what a bench measurement on a Rigol DHO804 should show, then checked against the scope captures. Full slides: [`FOC_Motor_Controller_Sim_and_Bench_Results.pdf`](Documentation/FOC_Motor_Controller_Sim_and_Bench_Results.pdf). Decks, raw captures and scripts: [`Simulation/`](Simulation/).
+Three LTspice decks built from the Rev 1 netlist, each predicting what a bench measurement on a Rigol DHO804 should show, then checked against the scope captures. Full slides: [`FOC_Motor_Controller_Sim_and_Bench_Results.pdf`](Documentation/FOC_Motor_Controller_Sim_and_Bench_Results.pdf). Decks, raw captures and scripts: [`Testing/Simulation/`](Testing/Simulation/).
 
 | | Simulation | Bench vs simulation |
 |---|---|---|
@@ -99,6 +99,20 @@ Bench results (12 V supply; hot-plug at 30 V):
 - **Hot-plug:** 30.15 V peak, no overshoot. The bench supply limits the charge rate, so the 36.3 V overshoot the ideal-source sim predicts doesn't occur on this supply.
 - **Switching:** 8.8 ns rise and 13.87 V peak at 12 V, against 7.0 ns in the sim. The difference is mostly the 70 MHz probe.
 - **Current sense:** the I/f spin at 2 A / 300 rpm gives a 2.04 A envelope, and the 112 mV pulse matches the sim's 120 mV.
+
+## Power-stage characterization
+
+Rev 1 was characterized on the bench without an encoder or a mechanical load, using the motor as an inductive load and as a source of kinetic energy. Full report: [`Testing/Bench/README.md`](Testing/Bench/README.md).
+
+<p align="center">
+  <img src="Testing/Bench/report/fig1_gate_drive_undershoot.png" width="80%" alt="Switch-node undershoot at low-side turn-on for three gate-drive settings, against the gate driver's -7 V rating">
+</p>
+
+- **Gate drive:** the driver's power-on gate current undershoots the switch node to −10 V (rating −7 V); 190 / 380 mA is clean to 10 A.
+- **Short-circuit protection:** the driver's power-on threshold corresponds to about 280 A. The trip works (22–23 A at 0.06 V); 0.13 V is now set.
+- **Regeneration:** one stop of the bare rotor raises a 12 V bus by 11 V. A firmware voltage clamp holds it; Rev 2 needs a hardware path.
+- **Current sensing:** accurate within 1–2 %; phase C is sampled late in the ADC sequence and is reconstructed at high duty.
+- **Dead-time:** set by the gate driver, not the MCU. Bridge voltage error 0.16–0.23 V.
 
 ## Bench GUI: FOCLINK
 
@@ -148,14 +162,15 @@ Screenshots are from the GUI's built-in board simulator (`python -m focgui --sim
 | Path | Contents |
 |---|---|
 | `Documentation/*.pdf` | Schematic, PCB artwork and reports (above) |
-| `FoC Motor Controller.kicad_pro` / `.kicad_sch` / `.kicad_pcb` | KiCad 10 project, root sheet and board |
-| `Schematics/` | Hierarchical sheets: power input and generation, MCU, gate driver, MOSFETs, sensing, CAN-FD, interconnects, position, LEDs |
-| `Libraries/` | Project-local symbols, footprints and 3D models (`${KIPRJMOD}/Libraries/`) |
-| `Simulation/` | LTspice bench-correlation suite with DHO804 captures; see [`Simulation/README.md`](Simulation/README.md) |
-| `Project Outputs/` | BOM, pick-and-place, netlist, Rev 1 fabrication package, per-layer PDFs |
+| `Hardware/FoC Motor Controller.kicad_pro` / `.kicad_sch` / `.kicad_pcb` | KiCad 10 project, root sheet and board |
+| `Hardware/Schematics/` | Hierarchical sheets: power input and generation, MCU, gate driver, MOSFETs, sensing, CAN-FD, interconnects, position, LEDs |
+| `Hardware/Libraries/` | Project-local symbols, footprints and 3D models (`${KIPRJMOD}/Libraries/`) |
+| `Testing/Simulation/` | LTspice bench-correlation suite with DHO804 captures; see [`Testing/Simulation/README.md`](Testing/Simulation/README.md) |
+| `Testing/Bench/` | Power-stage characterization report, test log, raw captures, probe map; see [`Testing/Bench/README.md`](Testing/Bench/README.md) |
+| `Hardware/Project Outputs/` | BOM, pick-and-place, netlist, Rev 1 fabrication package, per-layer PDFs |
 | `Documentation/` | Design notes, design rationale (DDR-001), layout and manufacturing review, portfolio deck, images |
 
-Open `FoC Motor Controller.kicad_pro` in KiCad 10. Vendor datasheets and the KiCad worksheet templates are not included; without the templates KiCad falls back to its default title block.
+Open `Hardware/FoC Motor Controller.kicad_pro` in KiCad 10. Vendor datasheets and the KiCad worksheet templates are not included; without the templates KiCad falls back to its default title block.
 
 ## Rev 2, top items
 
@@ -165,4 +180,4 @@ Open `FoC Motor Controller.kicad_pro` in KiCad 10. Vendor datasheets and the KiC
 4. More bulk capacitance, or a lower-ESR part
 5. Hardware CAN node addressing
 
-The full list, with reasons, is in [Design Notes §16](Documentation/Design_Notes.md#16-rev-2-list).
+The full list, with reasons, is in [Design Notes §16](Documentation/Design_Notes.md#16-rev-2-list). Measured inputs for the next revision (braking energy path, ADC input mapping, leg C's commutation loop, shunt layout, probe points) are in the [characterization report](Testing/Bench/README.md#4-rev-b-design-inputs).

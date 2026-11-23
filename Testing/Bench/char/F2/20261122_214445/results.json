@@ -1,0 +1,139 @@
+[
+ {
+  "ceiling_A": 10.0,
+  "step_pct": 3.02,
+  "scope": "STOP",
+  "fault_latched": 64.0,
+  "off_reason": 3.0,
+  "events": [
+   {
+    "t_ms": "5925",
+    "type": "FAULT",
+    "code": "OVERCURRENT",
+    "state": "3",
+    "mode": "1"
+   }
+  ],
+  "drv": {
+   "r0": null,
+   "r1": null,
+   "r5": null
+  },
+  "peak_A_scope": 13.7
+ },
+ {
+  "ceiling_A": 15.0,
+  "step_pct": 4.07,
+  "scope": "STOP",
+  "fault_latched": 64.0,
+  "off_reason": 3.0,
+  "events": [
+   {
+    "t_ms": "9738",
+    "type": "FAULT",
+    "code": "OVERCURRENT",
+    "state": "3",
+    "mode": "1"
+   }
+  ],
+  "drv": {
+   "r0": null,
+   "r1": null,
+   "r5": null
+  },
+  "peak_A_scope": 19.47
+ },
+ {
+  "ceiling_A": 20.0,
+  "step_pct": 5.12,
+  "scope": "STOP",
+  "fault_latched": 64.0,
+  "off_reason": 3.0,
+  "events": [
+   {
+    "t_ms": "13532",
+    "type": "FAULT",
+    "code": "OVERCURRENT",
+    "state": "3",
+    "mode": "1"
+   }
+  ],
+  "drv": {
+   "r0": null,
+   "r1": null,
+   "r5": null
+  },
+  "peak_A_scope": 25.79
+ },
+ {
+  "ceiling_A": 22.0,
+  "step_pct": 5.54,
+  "scope": "STOP",
+  "fault_latched": 1.0,
+  "off_reason": 5.0,
+  "events": [
+   {
+    "t_ms": "17363",
+    "type": "FAULT",
+    "code": "DRV_NFAULT",
+    "state": "3",
+    "mode": "1"
+   }
+  ],
+  "drv": {
+   "r0": null,
+   "r1": null,
+   "r5": null
+  },
+  "peak_A_scope": 26.03
+ },
+ {
+  "ceiling_A": 22.0,
+  "step_pct": 5.54,
+  "scope": "STOP",
+  "fault_latched": 1.0,
+  "off_reason": 5.0,
+  "events": [
+   {
+    "t_ms": "21168",
+    "type": "PWM",
+    "reason": "NFAULT"
+   },
+   {
+    "t_ms": "21168",
+    "type": "FAULT",
+    "code": "DRV_NFAULT",
+    "state": "2",
+    "mode": "0"
+   }
+  ],
+  "drv": {
+   "r0": null,
+   "r1": null,
+   "r5": null
+  },
+  "peak_A_scope": 26.08
+ },
+ {
+  "ceiling_A": 22.0,
+  "step_pct": 5.54,
+  "scope": "STOP",
+  "fault_latched": 1.0,
+  "off_reason": 5.0,
+  "events": [
+   {
+    "t_ms": "24912",
+    "type": "FAULT",
+    "code": "DRV_NFAULT",
+    "state": "3",
+    "mode": "1"
+   }
+  ],
+  "drv": {
+   "r0": null,
+   "r1": null,
+   "r5": null
+  },
+  "peak_A_scope": 26.07
+ }
+]
