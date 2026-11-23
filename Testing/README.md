@@ -1,8 +1,8 @@
-# Rev A test and bring-up report
+# Rev 1 test and bring-up report
 
-This is the whole test history of the Rev A board in one place, in the order it happened: first power, first switching,
+This is the whole test history of the Rev 1 board in one place, in the order it happened: first power, first switching,
 first spin, simulation against the scope, and then a full day of power-stage characterization. Each step says why it was
-done, what was done, what was found, and what it means for firmware and for Rev B.
+done, what was done, what was found, and what it means for firmware and for Rev 2.
 
 **The board:** STM32G431 + DRV8323S gate driver + six ISC030N10NM6 FETs, three 3 mΩ low-side shunts, about 350 µF on the
 bus, 25 kHz PWM. Designed for a 12S bus (56 V max) and 10 A rms per phase.
@@ -12,7 +12,7 @@ thermocouple. No dynamometer, no clamp, no encoder magnet mount. Everything belo
 last chapter lists what they left untested.
 
 <p align="center">
-  <img src="../Documentation/images/photo_bench_scope.jpg" width="420" alt="Rev A board on the bench with the MN601-S motor in front of the DHO804 scope">
+  <img src="../Documentation/images/photo_bench_scope.jpg" width="420" alt="Rev 1 board on the bench with the MN601-S motor in front of the DHO804 scope">
 </p>
 
 ---
@@ -36,7 +36,7 @@ last chapter lists what they left untested.
   at about 280 A.
 - Absorb braking energy. There is nowhere for it to go but 350 µF of capacitance; firmware has to refuse to brake.
 - Read all three phase currents above about 95 % duty.
-- Be stopped by a hardware E-stop. On Rev A the E-stop is the supply's switch.
+- Be stopped by a hardware E-stop. On Rev 1 the E-stop is the supply's switch.
 - Sense rotor position at standstill under load without the encoder.
 
 **Not yet known**
@@ -62,7 +62,7 @@ firmware's pin definitions against the schematic net by net, and by looking at t
   clock. At 332 kHz it reads correctly.
 
 **What we learned.** The driver now reports its power-on register values exactly. The slow SPI clock is a workaround for
-Rev A; Rev B should use a stronger pull-up. The lesson that stuck: audit the pin map against the schematic before
+Rev 1; Rev 2 should use a stronger pull-up. The lesson that stuck: audit the pin map against the schematic before
 suspecting the hardware.
 
 ### 1.2 First switching, with nothing connected
@@ -88,10 +88,10 @@ before a motor is connected.
 
 **What we found.** The driver's built-in calibration mode gave offsets 0.15–0.46 A away from the real ones, so
 calibration is done in normal mode with the bridge idle instead. Phase C's shunt is wired with the opposite polarity on
-Rev A and is corrected in firmware. The sign convention taken from the datasheet turned out inverted on the board; the
+Rev 1 and is corrected in firmware. The sign convention taken from the datasheet turned out inverted on the board; the
 first phase check failed for that reason and passed once corrected.
 
-**What we learned.** Current sense is usable, with two Rev A quirks carried in firmware. Its absolute accuracy was
+**What we learned.** Current sense is usable, with two Rev 1 quirks carried in firmware. Its absolute accuracy was
 still unproven at this point; that came in Part 4.
 
 ### 1.4 The first motor: identification and a first spin
@@ -170,7 +170,7 @@ load. Position sensing at standstill under torque still needs the encoder.
 
 ## Part 4: Characterizing the power stage (22 November 2026)
 
-The question for this part: what does a firmware engineer have to respect, and what should Rev B change? The motor is
+The question for this part: what does a firmware engineer have to respect, and what should Rev 2 change? The motor is
 only a tool here. Parked, it is an inductor; spinning, it is a source of power and of kinetic energy.
 
 A note on what is shown: runs that failed for probe contact, clipped captures and repeat runs are left out. They are all
@@ -295,7 +295,7 @@ their converter, while phase C is second in a sequence, 0.9–1.5 µs later, aft
 
 **What we learned.** A schematic-level choice of ADC pins cost 5 % of usable duty. The firmware now rebuilds whichever
 phase has the shortest window from the other two, and phase C reads −0.79 A against −0.80 A on phase B where it read
-−0.40 A before. Above about 95 % two phases are unreadable and nothing helps. Rev B should route the three signals so
+−0.40 A before. Above about 95 % two phases are unreadable and nothing helps. Rev 2 should route the three signals so
 that none waits behind another.
 
 ### 4.6 How fast does the firmware react to over-current?
@@ -377,7 +377,7 @@ The same stops against time, as the firmware reported them over the serial link:
   longer, because braking was being switched in and out, and the observer stayed locked.
 
 **What we learned.** This was a bare rotor holding at most about 2.7 J. The capacitors take about 0.13 J between 12 V
-and 30 V. A robot joint stores far more, so firmware must limit braking by bus voltage, which it now does, and Rev B
+and 30 V. A robot joint stores far more, so firmware must limit braking by bus voltage, which it now does, and Rev 2
 needs a braking resistor or an active clamp. More capacitance cannot solve it.
 
 ### 4.10 Heat
@@ -454,13 +454,13 @@ vindicated a second time.
 | Over-current check moved ahead of the encoder read | 4.6 |
 | Refuses to arm on stale measurements | 1.2 |
 
-**For Rev B**
+**For Rev 2**
 
 | Priority | Change | Because of |
 |---|---|---|
 | High | A braking resistor or active bus clamp sized for the joint's energy | 4.9 |
 | High | Current-sense outputs routed so both ADCs sample together, none second in a sequence | 4.5 |
-| High | A hardware E-stop input independent of the gate driver's enable | Rev A has none |
+| High | A hardware E-stop input independent of the gate driver's enable | Rev 1 has none |
 | Medium | Review the commutation loop of phase C against A and B | 4.4 |
 | Medium | Low-inductance shunt layout with Kelvin sensing and an input filter | 4.3 |
 | Medium | Gate resistors, or footprints for them, so edge rate does not depend on a register that powers up at its fastest | 4.3 |

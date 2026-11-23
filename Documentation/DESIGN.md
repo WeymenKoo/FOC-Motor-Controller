@@ -1,4 +1,4 @@
-# Rev A design decisions
+# Rev 1 design decisions
 
 Why the board is built the way it is. Measured behaviour, and what the bench changed, is in the
 [test and bring-up report](../Testing/README.md). Where the two disagree, the report wins.
@@ -28,17 +28,17 @@ motor current almost directly. Three consequences:
 | Draft 1 | STM32F405, 40 V FETs | 40 V parts on a 50.4 V bus are out of rating at rest. Check V<sub>DS</sub> against the worst transient first. |
 | Draft 2 | STM32G431, DRV8323S, 1.5 mΩ FETs | The lowest R<sub>DS(on)</sub> had the highest total loss. Select on figure of merit, not one parameter. |
 | Draft 3 | Hot-swap, dual XT60, USB-C, 3 regulators, off-board encoder, 19 sheets | Over-correction: every fault handled on every board. |
-| **Rev A** | Built | Each block classed required or discretionary, then placed on the right board. |
+| **Rev 1** | Built | Each block classed required or discretionary, then placed on the right board. |
 
-Drafts 1–3 were never fabricated. What Rev A removed and why:
+Drafts 1–3 were never fabricated. What Rev 1 removed and why:
 
 | Removed | Why |
 |---|---|
 | LM5069 hot-swap front end | Inrush and UV/OV are bus functions: once on the power-distribution board, not six times |
 | USB-C + CH340X | SWD does the job and frees the BOOT0 pin conflicts |
 | Gate resistor + diode networks | DRV8323 IDRIVE sets turn-on and turn-off slew separately |
-| Separate analog LDO + mux | Trimmed for area (now a Rev B item) |
-| CAN node-ID resistor ladder | Deferred to Rev B |
+| Separate analog LDO + mux | Trimmed for area (now a Rev 2 item) |
+| CAN node-ID resistor ladder | Deferred to Rev 2 |
 | Off-board-only encoder | Unshielded SPI through a moving joint was the top field-failure risk |
 
 ## Decisions
@@ -51,7 +51,7 @@ against 4.27 W for a 2.2 mΩ part, because switching loss dominated. TDSON-8 ins
 **2. Gate driver: DRV8323S (SPI).**
 SPI-set IDRIVE replaces gate resistor networks, and the charge pump (25 mA) covers three high-side gates with ~6×
 margin at 25 kHz. Trade-off: with 0 Ω gate resistors, edge rate depends entirely on a register that powers up at its
-fastest. The bench found that matters (report 4.3), so Rev B adds gate resistor footprints.
+fastest. The bench found that matters (report 4.3), so Rev 2 adds gate resistor footprints.
 
 **3. PWM: 25 kHz centre-aligned, 40 µs control ISR.**
 The requirement is audibility. 40 kHz was planned; 25 kHz leaves ISR headroom and cuts switching loss. Sanity check:
@@ -77,7 +77,7 @@ above the 65 V ratings of the DRV8323 and LMR36520, so nothing protects the 65�
 break (nFAULT → TIM1_BKIN), independent of firmware.
 
 **8. Power tree: LMR36520 buck to 5 V → TLV75733 LDO to 3.3 V.**
-Two regulators instead of three. Analog shares the digital 3.3 V; a separate analog rail is a Rev B item.
+Two regulators instead of three. Analog shares the digital 3.3 V; a separate analog rail is a Rev 2 item.
 
 **9. Grounding and stackup: 6 layers, L2 and L5 solid ground.**
 Both ground planes are unbroken across the whole board, including under the power stage. PGND, AGND and DGND join at one
@@ -87,7 +87,7 @@ make a loop through cable shields. Phase and bus terminals share one edge next t
 **10. Interfaces: CAN-FD to the host, UART to the bench GUI, SWD for debug.**
 CAN-FD (TCAN1044) for six nodes on one bus; UART (FOCLINK) for the bench console; no USB on the joint board.
 
-## Known Rev A compromises (decided, not discovered)
+## Known Rev 1 compromises (decided, not discovered)
 
 - No thermal vias under the low-side FETs (switch node kept on L1 for EMI). Rated 10 A until measured.
 - Board NTC at board centre, 22 mm from the FETs; it under-reads.
@@ -95,7 +95,7 @@ CAN-FD (TCAN1044) for six nodes on one bus; UART (FOCLINK) for the bench console
 - PB8 is both FDCAN_RX and BOOT0; option bytes must disable the pin boot.
 - E-stop input follows the driver enable, so it is not independent.
 
-Everything found on the bench, and the Rev B list that came from it, is in
+Everything found on the bench, and the Rev 2 list that came from it, is in
 [Part 5 of the test report](../Testing/README.md#part-5-what-changed-because-of-all-this).
 
 ## References

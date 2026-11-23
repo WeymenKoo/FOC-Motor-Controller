@@ -1,12 +1,12 @@
-# FoC Motor Controller · Rev A
+# FoC Motor Controller · Rev 1
 
 A single-axis, sensored field-oriented-control (FOC) motor controller for one joint of a cat-scale bipedal robot: 70 × 70 mm, 6 layers, built for a 12S bus. Six boards (one per joint) are planned, sharing the bus and talking over CAN-FD.
 
 <p align="center">
-  <img src="Documentation/images/photo_revA_boards.jpg" width="640" alt="Two Rev A boards from the first JLCPCB run: assembled top side in front, bare bottom side held up behind">
+  <img src="Documentation/images/photo_rev1_boards.jpg" width="640" alt="Two Rev 1 boards from the first JLCPCB run: assembled top side in front, bare bottom side held up behind">
 </p>
 
-**Status:** Rev A is design-frozen, fabricated, brought up and bench-characterized up to 30 V and 10 A (2026-11-22). What it can and cannot do, test by test, is in the [test and bring-up report](Testing/README.md). Not yet tested on the 12S bus, under shaft load, or with the encoder.
+**Status:** Rev 1 is design-frozen, fabricated, brought up and bench-characterized up to 30 V and 10 A (2026-11-22). What it can and cannot do, test by test, is in the [test and bring-up report](Testing/README.md). Not yet tested on the 12S bus, under shaft load, or with the encoder.
 
 | | |
 |---|---|
@@ -90,10 +90,10 @@ Brought up and characterized on the bench up to 30 V and 10 A: switching, curren
 sensorless closed-loop speed to 3000 rpm, with three LTspice decks checked against scope captures.
 
 **[Test and bring-up report →](Testing/README.md)**: every test in order, what it found, what it changed in firmware,
-and the Rev B list that came out of it.
+and the Rev 2 list that came out of it.
 
 <p align="center">
-  <img src="Documentation/images/photo_bench_setup.jpg" width="100%" alt="Bench setup: Rev A board and MN601-S motor, Rigol DHO804 scope, Korad KA3005P supply at 30 V, DMM reading a thermocouple">
+  <img src="Documentation/images/photo_bench_setup.jpg" width="100%" alt="Bench setup: Rev 1 board and MN601-S motor, Rigol DHO804 scope, Korad KA3005P supply at 30 V, DMM reading a thermocouple">
 </p>
 
 ## Bench GUI: FOCLINK
@@ -147,6 +147,6 @@ Screenshots are from the GUI's built-in board simulator (`python -m focgui --sim
 | `Testing/Simulation/` | LTspice decks, results and the matching scope captures |
 | `Testing/README.md` | **The test and bring-up report**: every test in order, why, what was found, what changed |
 | `Testing/Bench/` | Lab notebook, raw captures, report figures, probe map |
-| `Hardware/Project Outputs/` | BOM, pick-and-place, netlist, Rev A fabrication package, per-layer PDFs |
+| `Hardware/Project Outputs/` | BOM, pick-and-place, netlist, Rev 1 fabrication package, per-layer PDFs |
 
 Open `Hardware/FoC Motor Controller.kicad_pro` in KiCad 10. Vendor datasheets and the KiCad worksheet templates are not included; without the templates KiCad falls back to its default title block.

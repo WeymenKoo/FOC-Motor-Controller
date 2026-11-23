@@ -1,4 +1,4 @@
-# Characterization log — Rev A
+# Characterization log — Rev 1
 
 Bench 2026-11-22. KA3005P 30.0 V, DHO804 (70 MHz, 10x passive, hand-held), MN601-S as a stationary inductive load,
 firmware 0.6.1+sl (bench build). Raw data per test under `char/<test>/<timestamp>/` (npz + screenshots + json).
@@ -65,7 +65,7 @@ PWM_TEST (cm+0.8, cm, cm) %, open loop (~1–1.7 A; the current itself varies wi
 | 98 % | 0.5 µs | +1.283 | −0.610 | **−0.074** | +0.598 |
 | 98.8 % | 0.16 µs | +0.550 | −0.414 | −0.044 | +0.092 (all wrong) |
 - **Phase C's reading fails first** (window < ~2 µs), although B runs the same duty and stays consistent; A and B hold to ~0.5 µs.
-  Phase C's shunt is the one wired reversed on Rev A (SNC/SPC swapped) — suspected cause, to confirm on SOC.
+  Phase C's shunt is the one wired reversed on Rev 1 (SNC/SPC swapped) — suspected cause, to confirm on SOC.
 - **Envelope (provisional):** keep every phase's low-side window ≥ ~2 µs (duty ≤ 95 %) when using all three shunts, or
   reconstruct the highest-duty phase from the other two (A/B valid to ~0.5 µs).
 
@@ -84,7 +84,7 @@ exactly the measured transition (OK at 3.7–4 µs, failing at 2 µs).
 
 Firmware options (no hardware change): reconstruct ic = −(ia + ib) (A, B simultaneous and valid to ~1.2 µs windows); or
 shorten the injected sample time (12.5 cycles → C ends ~0.9 µs after centre); or move the ADC trigger ~0.7 µs before the
-centre so the samples straddle it. Rev B: put all three SOx on ADC12 shared inputs so the firmware can sample the two phases
+centre so the samples straddle it. Rev 2: put all three SOx on ADC12 shared inputs so the firmware can sample the two phases
 with the longest low-side windows simultaneously every period (sector-based selection). Confirmation test (no probes,
 needs a reflash): swap SOB/SOC ranks → phase B should then fail instead of C.
 
@@ -127,10 +127,10 @@ CH1 TP9 (+3V3) ref C41 GND; CH2 TP7 (+5V) ref C10 GND; AC 10 mV/div; random-time
 | Idle (DISARMED) | 15.1 / 2.7 mV | 15.5 / 2.4 mV | 117 / 9.9 mV | 54 / 5.2 mV |
 | Armed (DRV awake, not switching) | 15.1 / 2.5 mV | 14.0 / 2.3 mV | 112 / 9.8 mV | 36 / 4.9 mV |
 | Spinning 2000 rpm (13 W) | 23.0 / 3.2 mV | 17.3 / 3.0 mV | 102 / 8.9 mV | 103 / 9.4 mV |
-- **+3V3 is at the noise floor** at idle; motor switching adds ~1 mV rms. (Rev-A concern "analog shares digital 3V3": no
+- **+3V3 is at the noise floor** at idle; motor switching adds ~1 mV rms. (Rev-1 concern "analog shares digital 3V3": no
   measurable switching pickup on the rail at 13 W; the ADC-side effect is what matters — C1 data.)
 - **+5V: ~100 mV p-p at 120–160 kHz (+ 4.1 MHz edge content), same at idle and spinning** → the 5 V converter's light-load
-  (pulse-skipping) ripple, not the bridge. Board load ~12 mA. Check against what +5V feeds; Rev B: FPWM / more output C if it matters.
+  (pulse-skipping) ripple, not the bridge. Board load ~12 mA. Check against what +5V feeds; Rev 2: FPWM / more output C if it matters.
 - DC: scope +3V3 = 3.243–3.252 V, +5V = 5.011–5.022 V; MCU VDDA reads 3.299–3.301 V. **Unexplained:** ~50 mV between TP9 and
   the MCU's VDDA measurement (probe/ground offset or a real drop) — DMM check pending.
 - Scope lesson: `:SINGle` with AUTO sweep can return the previous record; noise/ripple captures use NORMal + `:TFORce`.
@@ -283,7 +283,7 @@ SL_POSITION hold rotated 180° electrical (REF POS 0.0357 turns): ia = −I, ib 
   pins were not measured. Explains the ~100 ns disturbance on SOx after each edge.
 - The first capture (5 V/div) clipped at −6.85 V and showed a false "22 MHz ±5 V" ringing — scope input overdrive, discarded.
 - Next: repeat at IDRIVE 11 and 7 on this polarity (a slower edge should shrink the undershoot far more than it did the
-  +0.9 V overshoot). Rev B: lower-inductance shunt placement / Kelvin source return, RC snubber or gate resistor on the low side.
+  +0.9 V overshoot). Rev 2: lower-inductance shunt placement / Kelvin source return, RC snubber or gate resistor on the low side.
 
 ## B4neg — IDRIVE sweep on the low-side hard edge (phase A sinking 3 A, 30 V) · `char/B4neg/20261122_202344`
 Registers read back: r3/r4 = 0x3FF/0x7FF (15), 0x3BB/0x7BB (11), 0x377/0x777 (7). CH1 10 V/div.
@@ -317,7 +317,7 @@ CH2 H1, trigger only (long ground lead: its amplitude is not a measurement — i
   switch-node undershoot, i.e. roughly half of the undershoot is dropped across the shunt's own inductance and its returns.
 - Limits: measured at the shunt, not at the IC pins (ground bounce between shunt and driver not captured); 70 MHz scope and
   a hand-held ×10 probe, so peaks are under-read; 3 A / 30 V only.
-- Second, independent reason not to run IDRIVE 15. Rev B: low-inductance shunt (wide/reverse-geometry or paralleled),
+- Second, independent reason not to run IDRIVE 15. Rev 2: low-inductance shunt (wide/reverse-geometry or paralleled),
   Kelvin sense routing with an RC filter at the amplifier inputs, shunt close to the FET source.
 
 ## FW — firmware changes from the findings, verified on the board · `char/FW/20261122_204048/results.json`
@@ -424,7 +424,7 @@ Hold vector rotated onto the phase (120° / 240° electrical, +180° for sinking
 - A and B are alike. **Phase C rings about twice as hard on both hard edges** — larger commutation-loop inductance for that
   leg (distance to the bus capacitors / its shunt return). Still inside the −7 V SHx rating at 3 A with IDRIVE 11, but C is
   the leg that sets the limit: all margins for higher current must be taken on phase C, not A.
-- Rev B: check phase C's half-bridge loop (capacitor placement, shunt and return path) against A and B.
+- Rev 2: check phase C's half-bridge loop (capacitor placement, shunt and return path) against A and B.
 
 ## B8 — phase A edges and bus ripple at 12 V and 24 V, 3 A, IDRIVE 11 · `char/B8/20261122_210544` (12 V), `…_210736` (24 V)
 CH1 H1 / R22-GND; CH2 H8 / H9 AC-coupled. 30 V column from B4 / B4neg / B5. (First pass lost the last two 24 V captures to the
@@ -523,7 +523,7 @@ and stops on a missed capture.)
 - **Phase C still undershoots −3.5 V at IDRIVE 7**, where phase A is clean (−0.8 V): the slower gate drive halves the problem
   on this leg but does not remove it. Its source is the layout of leg C.
 - Envelope: IDRIVE 7 keeps the worst leg at ≈ −3.5 V (pad) up to 5 A with no trend in current; IDRIVE 11 is not recommended.
-  Below 7 (codes 4–6: 60–120 mA source) is the next thing to try if more margin is wanted. Rev B: fix leg C's loop.
+  Below 7 (codes 4–6: 60–120 mA source) is the next thing to try if more margin is wanted. Rev 2: fix leg C's loop.
 
 ## B10b — phase C, IDRIVE 7 / 6 / 5 / 4 at 5 A, 30 V · `char/B10/20261122_213218`
 Same placement throughout (CH1 H3 / R32-GND, one hold of the probe). Input power is the whole board during the hold.
@@ -581,7 +581,7 @@ Currents are the SOA plateaus in the low-side windows (the last one sampled befo
 - Firmware trip overshoot at these ramp rates: the plateau at the trip is within ~1 A of the ceiling in every case. (The
   "peak" column printed by the script, 13.7–26 A, picked up the SOA edge spikes and is not used.)
 - Not resolved: the driver's reaction time (record at 2 µs per point; datasheet deglitch 4 µs + gate turn-off). The hard firmware
-  ceiling is 22.2 A (95 % of the CSA's linear range), so currents above ~23 A cannot be measured or protected by firmware on Rev A.
+  ceiling is 22.2 A (95 % of the CSA's linear range), so currents above ~23 A cannot be measured or protected by firmware on Rev 1.
 - No damage: every trip cleared with DISARM + CLEAR_FAULT, and the next pulse ran normally.
 
 ## B12 — phase C hard edges up to 10 A, IDRIVE 7, 30 V (firmware 2026-11-22c: 10 A hold cap) · `char/B12/C_20261122_215058`
@@ -648,5 +648,5 @@ capacitor is in parallel with the board's ~350 µF). Rotor: ~0.40 J removed from
 - **Envelope:** braking is usable up to ~1 A-equivalent of power (what the board itself consumes, a few watts) without any
   bus rise; anything more must be limited by bus voltage, as implemented here, or absorbed in hardware. The clamp level must
   sit below the lowest rating on the bus (here the bench supply's 30 V; on the board the 56 V design maximum).
-- **Rev B:** a braking resistor with a comparator- or MCU-driven switch, or a bus TVS / active clamp sized for the joint's
+- **Rev 2:** a braking resistor with a comparator- or MCU-driven switch, or a bus TVS / active clamp sized for the joint's
   kinetic energy; more bus capacitance alone cannot do it (350 µF holds only ~0.4 J between 30 V and 56 V).
