@@ -31,7 +31,11 @@ resistance is ~40–60 mΩ (datasheet 39 mΩ), not the 98 mΩ identified earlier
 | No-load input power | 6.1 W at 1000 rpm, 13.3 W at 2000 rpm, 21.1 W at 3000 rpm (sensorless closed loop) |
 | Firmware over-current trip | Outputs off ~19 µs after the ADC sample that sees it; worst case ≈ 60 µs → overload protection only |
 | Current-sense scale | Floating DMM across the shunt: board reading correct within 1–2 % (3 A and 5 A) |
+| Current-sense offsets / noise | Offsets move < 0.4 mV from 12 to 30 V, repeat within 1.1 mV; 20–27 mA rms per sample whether switching or not |
 | Three-shunt current sensing | Phase C is sampled 0.87–1.45 µs after the window centre (second in its ADC's sequence): valid only for low-side windows ≥ ~3 µs. Phases A/B valid to ~1.2 µs |
+| Stop paths | Heartbeat loss → outputs off at 501 ms (500 ms setting), every time; STOP / DISARM acknowledged in 11–44 ms over USB-serial |
+| Sensorless start-up | 50 / 50 starts to 1000 rpm; closed loop 2.449 ± 0.011 s after RUN |
+| Brown-out | Runs down to 5 V, restarts at 5–6 V; clean power-on reset, no latch-up; analog supply steady at 3.30 V throughout |
 | Thermal (rotor parked, 10 min each) | FET case +7.5 °C at 3 A, +10.2 °C at 5 A; fit: 6.0 °C fixed + 0.17 °C/A². Board NTC reads 1.5–2 °C above the FET case |
 
 ## What the firmware has to design around (provisional envelope)

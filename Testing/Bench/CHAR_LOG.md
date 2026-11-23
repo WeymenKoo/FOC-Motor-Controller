@@ -201,3 +201,47 @@ Expected V_avg = −ia · 3 mΩ · (1 − duty_a + t_dead/T).
   DC cross-check included the supply leads. **Firmware: `p_phase_r` (0.098 Ω) is suspect** — it sets the current-loop Ki and
   the observer's R·i term. → Direct 4-wire measurement of the motor (PSU in CC + DMM at the pins) to pin the value.
 - Lesson: millivolt measurements on a switching board need a floating instrument (A5b's scope attempt was ±30 %).
+
+## No-probe batch (UART + PSU only) · `char/NP/20261122_195422/results.json`
+
+### CSA offsets vs bus voltage (8 calibrations each; ARM → CSA_CAL → DISARM)
+| Bus | Offset A | Offset B | Offset C | Cal noise A / B / C |
+|---|---|---|---|---|
+| 12 V | 1648.04 ± 0.38 mV | 1631.22 ± 0.35 mV | 1620.72 ± 0.27 mV | 14.1 / 13.0 / 11.5 mA rms |
+| 18 V | 1648.17 ± 0.55 | 1631.38 ± 0.56 | 1620.76 ± 0.69 | 14.2 / 12.8 / 11.6 |
+| 24 V | 1648.35 ± 1.01 | 1631.59 ± 1.11 | 1621.09 ± 0.98 | 13.8 / 12.5 / 11.7 |
+| 30 V | 1648.24 ± 0.65 | 1631.37 ± 0.57 | 1621.03 ± 0.54 | 13.7 / 12.5 / 11.5 |
+Offsets move < 0.4 mV (< 7 mA) from 12 to 30 V; repeatability ≤ 1.1 mV (≤ 18 mA) between wake cycles. Channel spread A–C 27 mV.
+
+### Reported phase currents, bridge at zero current (120 samples each)
+| State | ia | ib | ic |
+|---|---|---|---|
+| Armed, not switching | +0.013 ± 0.024 A | +0.012 ± 0.022 | −0.014 ± 0.019 |
+| PWM 50 / 50 / 50 % | +0.009 ± 0.024 | −0.009 ± 0.021 | −0.006 ± 0.023 |
+| PWM 90 / 90 / 90 % | −0.015 ± 0.022 | +0.052 ± 0.023 | −0.011 ± 0.026 |
+| PWM 96 / 96 / 96 % | +0.066 ± 0.027 | −0.039 ± 0.023 | −0.022 ± 0.018 |
+**Switching adds no measurable noise** (20–27 mA rms per sample in every state). Mean shifts of up to ±66 mA appear at 90–96 %
+duty (short low-side windows). ISR peak 20.4 µs, 0 overruns.
+
+### Stop-path timing (PWM_TEST running, outputs verified off afterwards)
+| Path | Result |
+|---|---|
+| STOP → ACK (host round trip, n = 8) | 23 ms mean, 11–44 ms (USB-serial latency dominates) |
+| DISARM → ACK (n = 8) | 21 ms mean, 12–31 ms |
+| Heartbeat lost → DISARMED (`p_wd_timeout` 500 ms, n = 5) | firmware `age_ms` 501 every time; outputs off, state DISARMED |
+
+### Sensorless start reliability (2 A start, hand-over 600 rpm, target 1000 rpm, 30 V)
+**50 / 50 starts reached closed loop at 1000 ± 30 rpm, no faults.** RUN → CLOSED: 2.449 ± 0.011 s (2.43–2.47 s).
+Flux estimate at hand-over 1.036 ± 0.005 (1.029–1.045).
+
+### Brown-out sweep (DISARMED, PSU 30 → 4 → 30 V in 1 V steps)
+| Bus | Supply current | Board |
+|---|---|---|
+| 30 V | 13 mA | alive, VDDA 3.299 V |
+| 12 V | 27 mA | alive |
+| 6 V | 53 mA | alive, VDDA still 3.299 V |
+| 5 V | 64 mA | alive (falling), **dead on the way back up** (36 mA, no answer) |
+| 4 V | 3 mA | off |
+Constant-power input (regulators): current rises as the bus falls. Runs down to 5 V, restarts between 5 and 6 V (≈ 1 V hysteresis).
+VDDA holds 3.30 V down to 5 V. After recovery: `reset_cause` = power-on, parameters reloaded from flash, and the 12 V-era
+over-voltage limit faults the board again above 14 V — expected, no latch-up, no corrupted state.
