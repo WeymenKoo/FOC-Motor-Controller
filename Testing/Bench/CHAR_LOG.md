@@ -377,3 +377,51 @@ Line-line = A − B, sine fit on each half of the record (the speed falls ~28 rp
 - With the outputs off the phases float up to the bus: the highest phase sits at +30.5 V (bus + a high-side body-diode
   drop at leakage current), the others below it by the line-line back-EMF (minimum 26.8 V). No current flows; nothing is stressed.
 - Coast-down: ~2900 rpm/s at ~860 rpm → ~24 mN·m of drag with J ≈ 8e-5 kg·m² (estimate), i.e. ~2.1 W of friction + iron loss.
+
+## C2 — B vs C current mismatch at 50–95 % duty · `char/C2/B_20261122_205513`, `C_20261122_205622`
+PWM_TEST (cm + 0.8, cm, cm). CH1 the phase's switch node, CH2 its sense output; ADC raw voltage read over UART.
+| Common mode | SOB, scope at the sample instant | SOB, ADC | ia | ib | ic | Sum (where all three are sampled) |
+|---|---|---|---|---|---|---|
+| 50 % | −36.7 mV | −36.9 mV | +1.111 | −0.602 | −0.505 | +0.004 |
+| 80 % | −43.9 mV | −39.7 mV | +1.168 | −0.642 | −0.483 | +0.043 |
+| 90 % | −30.6 mV | −27.5 mV | +0.941 | −0.461 | (rebuilt) | — |
+| 95 % | −55.8 mV | −51.9 mV | +1.503 | −0.860 | (rebuilt) | — |
+Second run (probes on phase C): 50 %: +1.096 / −0.673 / −0.461, sum −0.038; 80 %: +1.108 / −0.674 / −0.461, sum −0.027.
+- **The mismatch is real current, not a sensing error.** SOB on the scope matches the ADC within 4 mV (70 mA), and with all three
+  phases sampled the readings sum to zero within 45 mA — while B and C differ by 100–210 mA, already at 50 % duty.
+- Cause: in this open-loop test B and C get the same duty, and the loop resistance is only ~25 mΩ, so **1 mV of difference
+  between the two legs' effective voltage moves ~40 mA** from one phase to the other. The split wandered between runs
+  (−0.56 / −0.56, −0.60 / −0.51, −0.67 / −0.46). It is a property of the open-loop test, not of closed-loop current control.
+- The SOC scope capture of the second run is invalid (CH2 made contact late: 1.39 V at the probe check, then clipped) and was
+  not repeated — the sum check answers the question; SOC against the ADC was already measured in C1b.
+
+## D1b — firmware over-current trip latency, re-measured on two switch nodes · `char/D1b/20261122_210005`
+PWM_TEST 50/50/50 → 53/50/50, trip 2.5 A, firmware of 2026-11-22 (over-current check before the encoder read). CH1 phase A,
+CH2 phase B; timeout trigger (fires 30 µs after phase A's last edge). Times relative to the trigger, 4 trips.
+| Event (run 0; runs 1–3 within 0.2 µs) | Time |
+|---|---|
+| Phase B falls (low-side window starts) | −50.8 µs |
+| ADC sample = centre of B's low-side window | −40.9 µs |
+| Phase A rises (its normal 53 % edge) | −31.6 µs |
+| **Phase A forced low again; phase B forced high (outputs off)** | **−31.4 µs** |
+- **Sample → outputs off: 9.5 µs, identical in 4 of 4 trips** (the ADC sequence, interrupt entry and the checks ahead of the trip).
+  Worst case from the current crossing the limit: 40 µs sample interval + 9.5 µs ≈ **50 µs**.
+- The earlier 19 µs (D1) was derived from an assumed sample instant read off the SOA trace; this measurement takes the sample
+  instant from the PWM pattern itself. The two are not a before/after comparison, so the gain from moving the check ahead of
+  the encoder read is not established (≤ 3.5 µs expected). The first attempt of this test (`…_205844`) caught ordinary
+  switching records (free-running trigger) and is not used.
+- Conclusion unchanged: overload protection only; a short circuit needs the gate driver's own trip.
+
+## B7 — phases B and C switch nodes, 3 A, 30 V, IDRIVE 11 (as flashed) · `char/B7/B_20261122_210217`, `C_20261122_210316`
+Hold vector rotated onto the phase (120° / 240° electrical, +180° for sinking). CH1 H2 / R27-GND, H3 / R32-GND. Phase A values from B4 / B4neg.
+| | Phase A | Phase B | Phase C |
+|---|---|---|---|
+| High-side turn-on (hard, sourcing) t10–90 | 15.9 ns | 16.8 ns | 16.2 ns |
+| Overshoot above the settled level | +0.6 V | +0.5 V | **+3.0 V** (32.4 V peak) |
+| Low-side turn-on (hard, sinking) t10–90 | 8.9 ns | 8.9 ns | 9.6 ns |
+| Minimum / undershoot below the settled level | −2.7 V / 2.1 V | −3.1 V / 2.5 V | **−4.5 V / 3.9 V** |
+| Soft edges t10–90 | 35–38 ns | 36–38 ns | 35 ns falling, 78 ns rising |
+- A and B are alike. **Phase C rings about twice as hard on both hard edges** — larger commutation-loop inductance for that
+  leg (distance to the bus capacitors / its shunt return). Still inside the −7 V SHx rating at 3 A with IDRIVE 11, but C is
+  the leg that sets the limit: all margins for higher current must be taken on phase C, not A.
+- Rev B: check phase C's half-bridge loop (capacitor placement, shunt and return path) against A and B.
