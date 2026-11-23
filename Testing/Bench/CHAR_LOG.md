@@ -297,3 +297,25 @@ Registers read back: r3/r4 = 0x3FF/0x7FF (15), 0x3BB/0x7BB (11), 0x377/0x777 (7)
 - **Recommendation (no longer provisional): do not run IDRIVE 15 on this layout. Default `p_drv_idrive` = 11, or 7 if the
   driver's negative-transient rating or EMI calls for it** (hard-edge loss at 3 A / 30 V: 0.35 → ~0.4 → ~0.8 µJ per edge).
   Re-check at 10 A / higher bus under supervision.
+
+## B6 — shunt-side pins during the hard edges (phase A, 3 A, 30 V) · `char/B6/20261122_202903`
+CH1 R22-S ref R22-GND, 2 V/div (voltage across shunt A = SPA–SNA, and the low-side source SLA against the shunt's ground end).
+CH2 H1, trigger only (long ground lead: its amplitude is not a measurement — it read −16.7 V where the short-loop B1neg read −9.5 V).
+| IDRIVE | Polarity | Edge | Shunt-side min / max | Beyond ±3 V for | Beyond ±1 V for |
+|---|---|---|---|---|---|
+| 15 | sourcing | high-side on (hard) | −1.74 / +1.07 V | 0 | — |
+| 15 | sourcing | high-side off | −1.10 / +1.02 V | 0 | — |
+| 15 | sinking | low-side off | −0.99 / +0.62 V | 0 | — |
+| 15 | **sinking** | **low-side on (hard)** | **−4.58 / +3.07 V** | 4.5 ns | 44 ns |
+| 11 | sourcing | high-side on (hard) | −1.13 / +0.96 V | 0 | — |
+| 11 | sourcing | high-side off | −0.54 / +0.53 V | 0 | — |
+| 11 | sinking | low-side off | −0.81 / +0.51 V | 0 | — |
+| 11 | sinking | low-side on (hard) | −2.43 / +1.66 V | 0 | 17 ns |
+- DRV8323 absolute maximum on SPx / SNx / SLx: ±3 V for a 200 ns transient, ±1 V continuous. **IDRIVE 15 exceeds it on the
+  low-side hard edge (−4.6 V); IDRIVE 11 stays inside (−2.4 V), with ~20 % margin.** Every other edge is within ±1.8 V.
+- The ringing (~90 MHz, ~80 ns) is the same burst seen on the switch node: ~1.5 V of shunt-side voltage per ~3 V of
+  switch-node undershoot, i.e. roughly half of the undershoot is dropped across the shunt's own inductance and its returns.
+- Limits: measured at the shunt, not at the IC pins (ground bounce between shunt and driver not captured); 70 MHz scope and
+  a hand-held ×10 probe, so peaks are under-read; 3 A / 30 V only.
+- Second, independent reason not to run IDRIVE 15. Rev B: low-inductance shunt (wide/reverse-geometry or paralleled),
+  Kelvin sense routing with an RC filter at the amplifier inputs, shunt close to the FET source.

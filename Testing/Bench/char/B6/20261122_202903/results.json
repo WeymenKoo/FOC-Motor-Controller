@@ -1,0 +1,66 @@
+[
+ {
+  "name": "ID15_src_rise",
+  "triggered": true,
+  "shunt_max": 1.0669466699999999,
+  "shunt_min": -1.74348846,
+  "sw_max": 31.1752206,
+  "sw_min": -1.3959651
+ },
+ {
+  "name": "ID15_src_fall",
+  "triggered": true,
+  "shunt_max": 1.02214611,
+  "shunt_min": -1.10188044,
+  "sw_max": 30.9112272,
+  "sw_min": -2.1346133
+ },
+ {
+  "name": "ID15_sink_rise",
+  "triggered": true,
+  "shunt_max": 0.62374113,
+  "shunt_min": -0.99254574,
+  "sw_max": 31.404548199999997,
+  "sw_min": -0.7026490999999999
+ },
+ {
+  "name": "ID15_sink_fall",
+  "triggered": true,
+  "shunt_max": 3.066705,
+  "shunt_min": -4.5781905599999995,
+  "sw_max": 31.013891299999997,
+  "sw_min": -16.6742498
+ },
+ {
+  "name": "ID11_src_rise",
+  "triggered": true,
+  "shunt_max": 0.9618786899999999,
+  "shunt_min": -1.12668075,
+  "sw_max": 30.769897399999998,
+  "sw_min": -1.3799655
+ },
+ {
+  "name": "ID11_src_fall",
+  "triggered": true,
+  "shunt_max": 0.52880661,
+  "shunt_min": -0.54240678,
+  "sw_max": 30.413906299999997,
+  "sw_min": -1.8906193999999998
+ },
+ {
+  "name": "ID11_sink_rise",
+  "triggered": true,
+  "shunt_max": 0.5104063799999999,
+  "shunt_min": -0.81281016,
+  "sw_max": 31.4445472,
+  "sw_min": -0.6839829
+ },
+ {
+  "name": "ID11_sink_fall",
+  "triggered": true,
+  "shunt_max": 1.66002075,
+  "shunt_min": -2.4250969799999997,
+  "sw_max": 31.0445572,
+  "sw_min": -6.2145113
+ }
+]
