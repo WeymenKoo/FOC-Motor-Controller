@@ -583,3 +583,33 @@ Currents are the SOA plateaus in the low-side windows (the last one sampled befo
 - Not resolved: the driver's reaction time (record at 2 µs per point; datasheet deglitch 4 µs + gate turn-off). The hard firmware
   ceiling is 22.2 A (95 % of the CSA's linear range), so currents above ~23 A cannot be measured or protected by firmware on Rev 1.
 - No damage: every trip cleared with DISARM + CLEAR_FAULT, and the next pulse ran normally.
+
+## B12 — phase C hard edges up to 10 A, IDRIVE 7, 30 V (firmware 2026-11-22c: 10 A hold cap) · `char/B12/C_20261122_215058`
+| Current | Low-side turn-on: t10–90 / minimum | High-side turn-on: t10–90 / peak | Input power |
+|---|---|---|---|
+| 5 A | 17.9 ns / −0.82 V | 27.3 ns / 29.4 V | 2.58 W |
+| 7.5 A | 18.3 ns / −0.92 V | 28.0 ns / 29.3 V | 3.93 W |
+| 10 A | 18.4 ns / −1.11 V | 28.9 ns / 29.4 V | 5.76–5.79 W |
+- Clean to 10 A: −0.06 V per amp, no overshoot on the high-side edge, no faults. This placement gave phase C's "clean" reading
+  (B11: other placements read ~2.5 V lower at the same setting); with that added the worst case at 10 A is ≈ −3.6 V vs −7 V rated.
+- Whole-board input power holding 10 A: 5.8 W.
+
+## DT — dead-time: MCU 200 ns vs 100 ns, DRV8323 dead-time 100 ns vs 50 ns · `char/DT/20261122/results.json`
+No probes. IDRIVE 7, 30 V. Voltage error = output vector (from the duties) − 30 mΩ × I. The 100 ns build is a test image
+(`make DTG=17`); the board was flashed back to 200 ns afterwards and verified.
+| MCU dead-time | DRV dead-time | Zero-current switching power | Error at 1 / 2 / 3 / 5 A | Input power at 5 A |
+|---|---|---|---|---|
+| 200 ns | 100 ns (code 1) | +0.73 W | 162 / 213 / 225 / 229 mV | 2.58 W |
+| 200 ns | 50 ns (code 0) | +0.74 W | 127 / 171 / 184 / 186 mV | 2.56 W |
+| 100 ns | 100 ns (code 1) | +0.74 W | 163 / 214 / 225 / 229 mV | 2.58 W |
+| 100 ns | 50 ns (code 0) | +0.75 W | 124 / 170 / 185 / 186 mV | 2.58 W |
+- **Halving the MCU dead-time changes nothing** (within 3 mV everywhere). **The effective dead-time is set by the gate driver**:
+  it waits for the outgoing gate to fall (slow at IDRIVE 7) and then adds its own dead-time. The DRV setting moves the error by
+  ~43 mV per 50 ns, exactly the expected 30 V × 50 ns / 40 µs × 4/3.
+- Effective dead-time from the error at 5 A: ≈ 230 ns at DRV code 1, ≈ 185 ns at code 0 (after ~10 mV of device drop) — the
+  MCU's 200 ns is therefore not the binding limit at IDRIVE 7; at IDRIVE 15 (B1: 189–213 ns at the node) it was.
+- **IDRIVE 7 costs voltage error**: 229 mV at 5 A now vs 184 mV at IDRIVE 11 (FW check) — the slower gate turn-off lengthens the
+  effective dead-time by ~45 ns. The price of the clean switch node.
+- No shoot-through signature at any setting: zero-current switching power unchanged (+0.73–0.75 W), no faults.
+- **Envelope: keep the MCU dead-time at 200 ns (no benefit below it). DRV dead-time code 0 (50 ns) is a free ~19 % reduction
+  of the voltage error** and can be set as a parameter (`p_drv_deadtime`), no rebuild.

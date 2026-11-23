@@ -33,6 +33,8 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
 | Phases B and C, bus 12 / 24 V (3 A, 440/880 mA gate current) | B like A. **Phase C rings twice as hard** (+3.0 V overshoot, −4.5 V undershoot). Undershoot is the same −2.7 V on phase A at 12, 24 and 30 V |
 | Motor flux constant (back-EMF while coasting) | 1.396 mV·s ± 0.5 % (KV 282), within 0.5 % of the value the firmware uses |
 | Bridge voltage error | ≈ 85 mV per phase at 1 A, ≈ 140 mV above 2 A; explains the observer's 3 % flux excess. Output-side compensation linearises holds but adds ripple at speed |
+| 10 A (phase C, 190/380 mA gate current) | Low-side undershoot −1.1 V, no overshoot, 5.8 W board input while holding 10 A |
+| Dead-time, MCU 100 vs 200 ns and driver 50 vs 100 ns | MCU value: no effect. Driver value: −43 mV of voltage error at 50 ns. No shoot-through at any setting |
 | Dead-time | 189–213 ns at the switch node (the MCU's 200 ns); body-diode plateau −1.0 V. Voltage error ≈ 0.3 V at 30 V |
 | Gate-drive strength (DRV8323 IDRIVE) | High-side edge, 1000 → 440 → 190 mA: rise 7.8 → 15.9 → 25.5 ns, overshoot 0.97 → 0.61 → 0.11 V. **Low-side edge: undershoot 9.5 → 2.1 → 0.2 V** for 7.1 → 8.9 → 18.4 ns |
 | Bus ripple | Static hold: ~20 mV p-p between edges, ±0.45 V / 20 ns spikes at hard edges. Under real load (21 W at 3000 rpm): 79 mV p-p |
@@ -61,9 +63,9 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
   the switch-node pin is −7 V for 200 ns**, so the default gate current puts this board outside the rating — and likewise on the shunt-side pins (−4.6 V measured, ±3 V rated).
 - **Phase C is the limiting leg** for switch-node stress: −3.5 V at 190/380 mA gate current and −4.7 to −5.0 V at 440/880 mA
   (3–5 A, at the pad), where phase A shows −0.8 / −2.7 V. The ringing barely grows with current (≈ −0.1 V per amp).
-- **Dead-time voltage error ≈ 1 % of the bus** (0.3 V at 30 V) for |I| ≳ 1 A, current-dependent below. It limits low-speed
-  torque linearity and blocks high-frequency-injection sensing on this low-inductance motor; compensation or a shorter
-  (verified) dead-time is needed.
+- **Bridge voltage error ≈ 0.16–0.23 V at 1–5 A** (190/380 mA gate current, 30 V), current-dependent below ~2 A. It is set by the
+  gate driver's own dead-time handling, not by the MCU's 200 ns: halving the MCU value changes nothing, while the driver's
+  50 ns setting removes ~43 mV. It limits low-speed torque linearity and blocks high-frequency-injection sensing.
 - **Over-voltage limit ≥ ~1.15 × the operating bus**, or the regen guard that refuses to lower the speed reference near OV is
   permanently active.
 - **Stops must coast.** The bus capacitance (~350 µF) holds far less energy than the rotor at speed; the bench supply cannot
@@ -96,6 +98,6 @@ measured 4-wire: **17.97 mΩ per phase** (35.9 mΩ line-line, matching the datas
 2. Undershoot at the driver IC's own pins (needs soldered leads: the only access is a 0.5 mm test point next to the gate
    test points) and at higher current / bus voltage, measured on phase C.
 3. Voltage-error compensation driven from the current reference instead of the measured current.
-4. Gate driver trip reaction time; 10 A thermal hold; regeneration step; shorter dead-time (all supervised).
+4. Gate driver trip reaction time; 10 A thermal hold; regeneration step (supervised).
 5. Not possible on this bench: efficiency under shaft load, bus-capacitor ripple at full power, high-side gate amplitude
    (needs a differential probe), EMC.
