@@ -1,7 +1,7 @@
 # Rev 1 design decisions
 
 Why the board is built the way it is. Measured behaviour, and what the bench changed, is in the
-[test and bring-up report](../Testing/README.md). Where the two disagree, the report wins.
+[bench session in the README](../README.md#bench-session-22-november-2026). Where the two disagree, the measurements win.
 
 ## The requirement that drives everything
 
@@ -51,7 +51,7 @@ against 4.27 W for a 2.2 mΩ part, because switching loss dominated. TDSON-8 ins
 **2. Gate driver: DRV8323S (SPI).**
 SPI-set IDRIVE replaces gate resistor networks, and the charge pump (25 mA) covers three high-side gates with ~6×
 margin at 25 kHz. Trade-off: with 0 Ω gate resistors, edge rate depends entirely on a register that powers up at its
-fastest. The bench found that matters (report 4.3), so Rev 2 adds gate resistor footprints.
+fastest. The bench found that matters, so Rev 2 adds gate resistor footprints.
 
 **3. PWM: 25 kHz centre-aligned, 40 µs control ISR.**
 The requirement is audibility. 40 kHz was planned; 25 kHz leaves ISR headroom and cuts switching loss. Sanity check:
@@ -60,7 +60,7 @@ The requirement is audibility. 40 kHz was planned; 25 kHz leaves ISR headroom an
 **4. Current sensing: 3 × 3 mΩ low-side shunts, Kelvin, DRV8323 CSA gain 20.**
 Shunt and gain are one decision: ±27.5 A ideal, ±23.3 A linear (CSA output swing). Gain 40 would cap at ±13.75 A.
 Noise rejection is by sample timing (TIM1 CH4 at counter peak triggers injected ADC conversions), not filtering; the
-56 Ω / 2.2 nF RC only damps edges. Low-side shunts cannot see current at very high duty; that limit is in the report (4.5).
+56 Ω / 2.2 nF RC only damps edges. Low-side shunts cannot see current at very high duty; see the README bench session.
 
 **5. DC link: 3 × 100 µF polymer + 9 × 4.7 µF / 100 V MLCC.**
 Sized by ripple current (~7.8 A RMS at 10 A/phase), not capacitance. MLCCs sit ~6 mm from the FETs to close the
@@ -96,7 +96,7 @@ CAN-FD (TCAN1044) for six nodes on one bus; UART (FOCLINK) for the bench console
 - E-stop input follows the driver enable, so it is not independent.
 
 Everything found on the bench, and the Rev 2 list that came from it, is in
-[Part 5 of the test report](../Testing/README.md#part-5-what-changed-because-of-all-this).
+[the README](../README.md#rev-2).
 
 ## References
 
