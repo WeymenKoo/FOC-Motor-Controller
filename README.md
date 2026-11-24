@@ -8,7 +8,7 @@ A single-axis, sensored field-oriented-control (FOC) motor controller for one jo
 
 **Status:** Rev 1 is design-frozen, fabricated, brought up and bench-characterized up to 30 V and 10 A (2026-11-22). Results from the most recent bench session are [below](#bench-session-22-november-2026). Not yet tested on the 12S bus, under shaft load, or with the encoder.
 
-**Who did what.** The firmware was developed by Claude (Anthropic's AI model), including every firmware change listed in the bench session below. I am responsible for the electrical bring-up and the engineering decisions: what to test, how to read the results, which limits the firmware must enforce, and what changes in Rev 2.
+**Who did what.** The firmware and the FOCLINK bench GUI were developed by Claude (Anthropic's AI model), including every firmware change listed in the bench session below. I am responsible for the electrical bring-up and the engineering decisions: what to test, how to read the results, which limits the firmware must enforce, and what changes in Rev 2.
 
 | | |
 |---|---|
@@ -24,48 +24,6 @@ A single-axis, sensored field-oriented-control (FOC) motor controller for one jo
 | Board | 70 × 70 mm, 6 layers, KiCad 10, fabricated and assembled by JLCPCB |
 
 ---
-
-## Renders
-
-<p align="center">
-  <img src="Documentation/images/render_pair.jpg" width="100%" alt="Render of two boards on brass standoffs, one top side up and one flipped">
-</p>
-
-<table>
-  <tr>
-    <td><img src="Documentation/images/render_top.jpg" alt="Top side render"></td>
-    <td><img src="Documentation/images/render_bottom.jpg" alt="Bottom side render"></td>
-  </tr>
-  <tr>
-    <td align="center">Top: bridge, DRV8323S, STM32G431, bulk caps, connectors</td>
-    <td align="center">Bottom: power bus, phase pads, AS5047P encoder</td>
-  </tr>
-</table>
-
-Rendered in Blender (Cycles) from the KiCad board and the fabrication Gerbers, on brass M3 standoffs.
-
-## On the motor
-
-Rendered with the ODrive M8325s (100 KV, 20 pole pairs), the reference motor for the leg joint, on the 3D-printed test upright.
-
-<p align="center">
-  <img src="Documentation/images/render_bench_board_side.jpg" width="100%" alt="Board mounted on the test upright with the M8325s motor behind it, phase leads, bus leads and JST-GH cables attached">
-</p>
-
-<table>
-  <tr>
-    <td><img src="Documentation/images/render_bench_motor_side.jpg" alt="Motor side of the test upright"></td>
-    <td><img src="Documentation/images/render_encoder_ghost_motor.jpg" alt="Transparent motor over the bottom of the board showing the encoder magnet above the AS5047P"></td>
-  </tr>
-  <tr>
-    <td align="center">Motor side of the test upright</td>
-    <td align="center">Motor shown transparent: the diametric magnet sits on the shaft axis over the AS5047P</td>
-  </tr>
-</table>
-
-<p align="center">
-  <img src="Documentation/images/render_connection_map.jpg" width="70%" alt="Top-down connection map: phase outputs to the motor, DC bus input, CAN-FD, UART, I2C, encoder AUX, motor temperature, E-stop and SWD">
-</p>
 
 ## PCB layout
 
@@ -86,34 +44,45 @@ Stackup: L1 signal + power, L2 ground, L3 / L4 signal + power, L5 ground (identi
 
 Plots of every copper, mask, paste and silkscreen layer are in [`Hardware/Project Outputs/PCB Layers PDF/`](Hardware/Project%20Outputs/PCB%20Layers%20PDF/). The full board drawing is [`FoC_Motor_Controller_PCB_Artwork.pdf`](Documentation/FoC_Motor_Controller_PCB_Artwork.pdf).
 
-## Bench GUI: FOCLINK
+## On the motor (render)
 
-FOCLINK is the bench console: a PySide6 app styled as a NERV operations terminal, talking to the firmware over UART. The GUI holds no safety logic; it only requests, and the firmware decides what is allowed. The firmware and GUI live in a separate repository.
+The board on its 3D-printed test upright with the ODrive M8325s (100 KV, 20 pole pairs), the reference motor for the leg joint.
 
 <p align="center">
-  <img src="Documentation/images/gui_dashboard.png" width="100%" alt="FOCLINK dashboard: safety and arming, live tiles, trend charts, subsystem status">
+  <img src="Documentation/images/render_bench_board_side.jpg" width="100%" alt="Render: board mounted on the test upright with the M8325s motor behind it, phase leads, bus leads and JST-GH cables attached">
+</p>
+
+## Bench GUI: FOCLINK
+
+FOCLINK is the bench console: a PySide6 app that talks to the firmware over UART. It holds no safety logic; it only
+requests, and the firmware decides what is allowed. Like the firmware, it was developed by Claude, and it lives in the
+firmware repository.
+
+<p align="center">
+  <img src="Documentation/images/gui/gui_boot.gif" width="100%" alt="FOCLINK start-up: title card, boot log, then the dashboard">
 </p>
 
 <table>
   <tr>
-    <td><img src="Documentation/images/gui_magi.png" alt="MAGI view: three votes summarising power stage, subsystems and link"></td>
-    <td><img src="Documentation/images/gui_motor_bringup.png" alt="Motor bring-up: preflight sync, bench confirmations, settings and run sequence"></td>
+    <td><img src="Documentation/images/gui/gui_dashboard_running.png" alt="Dashboard while the motor spins: RUNNING banner, live phase currents, speed and bus trends"></td>
+    <td><img src="Documentation/images/gui/gui_spin_control_running.png" alt="Spin control while the motor spins at 300 rpm: bench sync, limits, throttle and live run data"></td>
   </tr>
   <tr>
-    <td align="center"><b>MAGI 合議</b>: power stage, subsystems and link summarised as three votes</td>
-    <td align="center"><b>Motor bring-up 起動試験</b>: preflight sync, then phase check, R and L identification</td>
+    <td align="center"><b>Dashboard</b>: armed and switching, phase currents and speed live</td>
+    <td align="center"><b>Spin control</b>: limits set first, then the throttle; 300 rpm at 2 A</td>
   </tr>
   <tr>
-    <td><img src="Documentation/images/gui_spin_control.png" alt="Spin control: bench sync, limits, throttle and live run data"></td>
-    <td><img src="Documentation/images/gui_terminal.png" alt="Terminal: console and parameter table"></td>
+    <td><img src="Documentation/images/gui/gui_motor_bringup.png" alt="Motor bring-up: preflight sync, bench settings and the run sequence with CSA calibration passed"></td>
+    <td><img src="Documentation/images/gui/gui_terminal_running.png" alt="Terminal: the command log of setting limits, arming, calibrating and spinning, with the parameter table"></td>
   </tr>
   <tr>
-    <td align="center"><b>Spin control 回転制御</b>: limits first, then the open-loop I/f throttle</td>
-    <td align="center"><b>Terminal 端末</b>: console, parameters, scope, DRV8323 registers</td>
+    <td align="center"><b>Motor bring-up</b>: preflight sync, bench settings, one click per step</td>
+    <td align="center"><b>Terminal</b>: every command and acknowledgement, parameter table</td>
   </tr>
 </table>
 
-Screenshots are from the GUI's built-in board simulator (`python -m focgui --sim foclink-spin`), not a live board.
+These captures come from FOCLINK's built-in board simulator (`--sim foclink-spin`), spinning a simulated motor open-loop
+at 300 rpm and 2 A with the protection limits saved on the real board. They show the GUI, not bench data.
 
 ## Bench session, 22 November 2026
 
