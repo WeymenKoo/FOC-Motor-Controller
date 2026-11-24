@@ -7,9 +7,8 @@ fp-info-cache
 *.lck
 *.DS_Store
 
-# KiCad local history + tool lock folders
+# KiCad local history
 .history/
-.ltspice-mcp/
 
 # Not published: third-party datasheets, KiCad templates, review-pending files, generated backups
 Documentation/Datasheets/

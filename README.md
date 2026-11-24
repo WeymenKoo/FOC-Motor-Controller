@@ -347,7 +347,7 @@ are in [`Testing/Bench/char/`](Testing/Bench/char/), one folder per test and tim
 | `Hardware/Schematics/` | Hierarchical sheets: power input and generation, MCU, gate driver, MOSFETs, sensing, CAN-FD, interconnects, position, LEDs |
 | `Hardware/Libraries/` | Project-local symbols, footprints and 3D models (`${KIPRJMOD}/Libraries/`) |
 | `Testing/Simulation/` | LTspice decks (`.asc`), reference results and the matching scope captures. The FET model is a behavioural fit, not Infineon's |
-| `Testing/Bench/` | Raw scope captures per test, probe map |
+| `Testing/Bench/` | Raw scope captures per test, probe map, scope / PSU driver (`instruments.py`) |
 | `Hardware/Project Outputs/` | BOM, pick-and-place, netlist, Rev 1 fabrication package, per-layer PDFs |
 
 Open `Hardware/FoC Motor Controller.kicad_pro` in KiCad 10. Vendor datasheets and the KiCad worksheet templates are not included; without the templates KiCad falls back to its default title block.
